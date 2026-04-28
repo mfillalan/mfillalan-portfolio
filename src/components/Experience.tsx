@@ -49,7 +49,7 @@ const experience: Job[] = [
     role: 'Programmer',
     period: '2009 – 2011',
     bullets: [
-      'Added new features to an inventory management system built on ASP.NET with a VB.NET back end.',
+      'Developed new features for SABER, a naval inventory management system built on ASP.NET with a VB.NET back end.',
       'Performed SQL Server data cleanup and maintenance to improve data integrity.',
     ],
   },
