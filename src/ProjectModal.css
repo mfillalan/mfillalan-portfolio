@@ -2,7 +2,7 @@
 dialog.project-modal {
   border: 1px solid var(--border);
   border-radius: 14px;
-  background: var(--surface);
+  background: #fffdf7;
   color: var(--text);
   padding: 0;
   max-width: min(860px, 94vw);
@@ -13,7 +13,7 @@ dialog.project-modal {
 }
 
 dialog.project-modal::backdrop {
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(45, 35, 20, 0.45);
   backdrop-filter: blur(4px);
 }
 
@@ -55,7 +55,7 @@ dialog.project-modal::backdrop {
   border: 1px solid var(--border);
   object-fit: contain;
   max-height: 400px;
-  background: #0a0a0c;
+  background: #f2ecdf;
 }
 
 .modal-thumbs {
