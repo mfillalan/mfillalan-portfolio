@@ -13,6 +13,10 @@ main::before {
   background-size: 100% 38px;
 }
 
+main.resume-route::before {
+  display: none;
+}
+
 /* Navbar */
 .navbar {
   position: sticky;
@@ -141,6 +145,24 @@ main::before {
   margin-bottom: 0.8rem;
 }
 
+.hero-intro {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 0.2rem;
+}
+
+.hero-photo {
+  width: clamp(118px, 15vw, 188px);
+  height: clamp(118px, 15vw, 188px);
+  border-radius: 999px;
+  object-fit: cover;
+  object-position: center 24%;
+  border: 4px solid #fff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
+}
+
 .accent {
   color: var(--accent-dark);
   font-style: italic;
@@ -243,6 +265,83 @@ main::before {
   font-family: 'Manrope', sans-serif;
 }
 
+/* Education */
+.education-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.education-card {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 1.2rem;
+  background: rgba(255, 253, 247, 0.8);
+  border: 1px solid rgba(216, 204, 182, 0.8);
+  border-left: 6px solid #7a9cb8;
+  border-radius: 10px;
+  padding: 1.2rem 1.3rem;
+  align-items: start;
+}
+
+.education-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  padding-top: 0.15rem;
+}
+
+.education-period {
+  font-size: 0.82rem;
+  font-weight: 700;
+  font-family: 'Manrope', sans-serif;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.education-degree {
+  font-size: 1.05rem;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 0.1rem;
+}
+
+.education-concentration {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #7a9cb8;
+  margin-bottom: 0.2rem;
+  font-family: 'Manrope', sans-serif;
+}
+
+.education-school {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-family: 'Manrope', sans-serif;
+  margin-bottom: 0.5rem;
+}
+
+.education-detail {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+@media (max-width: 600px) {
+  .education-card {
+    grid-template-columns: 1fr;
+    gap: 0.4rem;
+  }
+
+  .education-meta {
+    align-items: flex-start;
+  }
+}
+
 /* Experience */
 .timeline {
   display: flex;
@@ -322,6 +421,10 @@ main::before {
   padding: 1.8rem;
   color: #6f6458;
   font-size: 0.86rem;
+}
+
+.resume-route + .footer {
+  display: none;
 }
 
 .theme-switcher {
@@ -445,6 +548,15 @@ main::before {
 
   .hero-content {
     border-radius: 14px;
+  }
+
+  .hero-intro {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .hero-photo {
+    margin: 0 auto;
   }
 
   .section {

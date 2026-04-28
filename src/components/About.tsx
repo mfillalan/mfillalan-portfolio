@@ -5,25 +5,24 @@ export default function About() {
         <h2 className="section-title">About Me</h2>
         <div className="about-content">
           <p>
-            I've been writing code since I was 11 years old — what started as curiosity
-            turned into a 14-year professional career building real-world software. For the
-            past several years I've been a core engineer on <strong>WILD</strong>, a web-based
-            naval inventory management system, where I've maintained production features and
-            recently led a full ground-up modernization of the legacy platform.
+            I've been writing code since I was 11 — what started as obsessive curiosity
+            became a 14-year professional career. I'm a hard worker who genuinely enjoys the
+            craft: I don't stop at "it works," I keep going until it's something I'm proud of.
           </p>
           <p>
-            That modernization — WILD 2.0 — took the system from VB.NET / ASP.NET 3.5 Web
-            Forms with an Oracle database to a modern stack: <strong>React + TypeScript</strong> on
-            the front end, <strong>ASP.NET Core</strong> on the back end, and <strong>MSSQL</strong>.
-            Architecting and driving that transition has been the most technically rewarding work
-            of my career so far.
+            My background is in building and modernizing production systems, but what drives
+            me is finding the creative angle inside technical problems. I gravitate toward
+            experiences that feel alive — I believe good software should have the same pull
+            as a great game: intuitive, responsive, and just fun to use. I bring that same
+            design sensibility to the products I build, crafting UIs that feel less like
+            forms and more like worlds.
           </p>
           <p>
-            Over the past year I've made a deliberate shift to becoming a fully
-            <strong> AI-native software engineer</strong> — not just using AI tools, but deeply
-            integrating them into every part of how I design, build, and ship software. I'm
-            actively building tooling in this space and am looking for a team where that mindset
-            is a strength, not a novelty.
+            I'm actively looking to work on projects that push boundaries — teams willing to
+            think differently about what software can be. I've gone deep on AI-native
+            development over the past year and I'm eager to apply that alongside strong
+            full-stack fundamentals wherever creative, motivated people are building
+            something worth building.
           </p>
         </div>
       </div>
