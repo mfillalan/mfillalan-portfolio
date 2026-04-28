@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import './App.css'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
 import About from './components/About'
@@ -9,68 +8,50 @@ import Education from './components/Education'
 import Experience from './components/Experience'
 import Contact from './components/Contact'
 import ResumePage from './components/ResumePage'
-import MagneticParticles from './components/MagneticParticles'
 import KonamiMatrix from './components/KonamiMatrix'
+import AmbientParticles from './components/AmbientParticles'
 
-type ThemeMode = 'editorial' | 'brutalist' | 'studio'
+type Theme = 'light' | 'dark'
 
 function App() {
-  const [theme, setTheme] = useState<ThemeMode>(() =>
-    window.matchMedia('(prefers-color-scheme: dark)').matches ? 'studio' : 'editorial'
-  )
+  const [theme, setTheme] = useState<Theme>(() => {
+    const saved = localStorage.getItem('theme') as Theme | null
+    if (saved) return saved
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+  })
+
   const [isResumeRoute, setIsResumeRoute] = useState(() =>
     window.location.hash.startsWith('#/resume'),
   )
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme)
+    document.documentElement.classList.toggle('dark', theme === 'dark')
+    localStorage.setItem('theme', theme)
   }, [theme])
 
   useEffect(() => {
     const onHashChange = () => {
-      setIsResumeRoute(window.location.hash.startsWith('#/resume'))
+      const nextIsResume = window.location.hash.startsWith('#/resume')
+      // Only reset scroll when entering/leaving the resume route,
+      // not on every section anchor change.
+      setIsResumeRoute((prev) => {
+        if (prev !== nextIsResume) window.scrollTo(0, 0)
+        return nextIsResume
+      })
     }
-
     window.addEventListener('hashchange', onHashChange)
-    onHashChange()
-
     return () => window.removeEventListener('hashchange', onHashChange)
   }, [])
 
+  const toggleTheme = () => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))
+
   return (
-    <>
+    <div className="relative min-h-screen text-foreground">
+      {!isResumeRoute && <AmbientParticles />}
       <KonamiMatrix />
-      <MagneticParticles />
-      {!isResumeRoute && (
-        <aside className="theme-switcher" aria-label="Theme switcher">
-          <span>Style Lab</span>
-          <div className="theme-options">
-            <button
-              className={theme === 'editorial' ? 'active' : ''}
-              onClick={() => setTheme('editorial')}
-              type="button"
-            >
-              Editorial
-            </button>
-            <button
-              className={theme === 'brutalist' ? 'active' : ''}
-              onClick={() => setTheme('brutalist')}
-              type="button"
-            >
-              Brutalist
-            </button>
-            <button
-              className={theme === 'studio' ? 'active' : ''}
-              onClick={() => setTheme('studio')}
-              type="button"
-            >
-              Studio
-            </button>
-          </div>
-        </aside>
-      )}
-      <Navbar isResumeRoute={isResumeRoute} />
-      <main className={isResumeRoute ? 'resume-route' : ''}>
+      <Navbar isResumeRoute={isResumeRoute} theme={theme} onToggleTheme={toggleTheme} />
+
+      <main>
         {isResumeRoute ? (
           <ResumePage />
         ) : (
@@ -79,17 +60,28 @@ function App() {
             <About />
             <Projects />
             <Skills />
-            <Education />
             <Experience />
+            <Education />
             <Contact />
           </>
         )}
       </main>
-      <footer className="footer">
-        <p>&copy; {new Date().getFullYear()} mfillalan. All rights reserved.</p>
-        <span className="konami-hint" title="Try the Konami code: ↑↑↓↓←→←→BA">⌨</span>
-      </footer>
-    </>
+
+      {!isResumeRoute && (
+        <footer className="border-t border-border py-10 px-6">
+          <div className="container mx-auto max-w-6xl flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
+            <p>© {new Date().getFullYear()} Michael Fillalan. Built with React, Tailwind & Framer Motion.</p>
+            <p
+              data-boid-orbit
+              className="font-mono text-xs"
+              title="Try the Konami code: ↑↑↓↓←→←→BA"
+            >
+              ↑↑↓↓←→←→BA
+            </p>
+          </div>
+        </footer>
+      )}
+    </div>
   )
 }
 

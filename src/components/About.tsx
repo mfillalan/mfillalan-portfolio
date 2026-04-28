@@ -1,34 +1,96 @@
-import { useScrollReveal } from '../hooks/useScrollReveal';
+import { motion } from 'framer-motion'
+import { Code2, Sparkles, Target } from 'lucide-react'
+
+const principles = [
+  {
+    icon: Code2,
+    title: 'Craft over completion',
+    body: "I don't stop at \"it works.\" I keep going until it's something I'm proud of.",
+  },
+  {
+    icon: Sparkles,
+    title: 'Software that feels alive',
+    body: 'Good UIs feel less like forms and more like worlds — intuitive, responsive, fun to use.',
+  },
+  {
+    icon: Target,
+    title: 'AI-native fundamentals',
+    body: '14 years of full-stack discipline, now applied to durable agent workflows and tooling.',
+  },
+]
 
 export default function About() {
-  const ref = useScrollReveal();
   return (
-    <section id="about" className="section reveal" ref={ref as React.RefObject<HTMLElement>}>
-      <div className="container">
-        <h2 className="section-title">About Me</h2>
-        <div className="about-content">
-          <p>
-            I've been writing code since I was 11 — what started as obsessive curiosity
-            became a 14-year professional career. I'm a hard worker who genuinely enjoys the
-            craft: I don't stop at "it works," I keep going until it's something I'm proud of.
+    <section id="about" className="relative py-32 px-6">
+      <div className="container mx-auto max-w-6xl">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-100px' }}
+          transition={{ duration: 0.6 }}
+          className="max-w-2xl mb-16"
+        >
+          <p className="font-mono text-xs uppercase tracking-[0.2em] text-primary mb-4">
+            01 — About
           </p>
-          <p>
-            My background is in building and modernizing production systems, but what drives
-            me is finding the creative angle inside technical problems. I gravitate toward
-            experiences that feel alive — I believe good software should have the same pull
-            as a great game: intuitive, responsive, and just fun to use. I bring that same
-            design sensibility to the products I build, crafting UIs that feel less like
-            forms and more like worlds.
-          </p>
-          <p>
-            I'm actively looking to work on projects that push boundaries — teams willing to
-            think differently about what software can be. I've gone deep on AI-native
-            development over the past year and I'm eager to apply that alongside strong
-            full-stack fundamentals wherever creative, motivated people are building
-            something worth building.
-          </p>
+          <h2 className="font-display text-4xl sm:text-5xl tracking-tight text-balance">
+            Coding since I was 11. Still obsessed.
+          </h2>
+        </motion.div>
+
+        <div className="grid lg:grid-cols-12 gap-12 items-start">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-100px' }}
+            transition={{ duration: 0.7, delay: 0.1 }}
+            className="lg:col-span-7 space-y-6 text-lg leading-relaxed text-muted-foreground"
+          >
+            <p>
+              <span className="text-foreground">What started as obsessive curiosity</span> at age
+              11 turned into a 14-year professional career. I'm a hard worker who genuinely
+              enjoys the craft.
+            </p>
+            <p>
+              My background is building and modernizing production systems, but what drives me is
+              finding the creative angle inside technical problems. I gravitate toward
+              experiences that feel alive — I believe good software should have the same pull as
+              a great game.
+            </p>
+            <p>
+              <span className="text-foreground">I'm actively looking</span> to work on projects
+              that push boundaries — teams willing to think differently about what software can
+              be. I've gone deep on AI-native development over the past year and I'm eager to
+              apply that alongside strong full-stack fundamentals wherever creative, motivated
+              people are building something worth building.
+            </p>
+          </motion.div>
+
+          <div className="lg:col-span-5 space-y-3">
+            {principles.map((p, i) => (
+              <motion.div
+                key={p.title}
+                initial={{ opacity: 0, x: 30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, margin: '-100px' }}
+                transition={{ duration: 0.5, delay: 0.2 + i * 0.1 }}
+                whileHover={{ y: -2 }}
+                className="rounded-2xl border border-border bg-card p-5 hover:border-primary/40 transition-colors"
+              >
+                <div className="flex items-start gap-4">
+                  <div className="rounded-lg bg-primary/10 text-primary p-2 shrink-0">
+                    <p.icon className="size-4" />
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-base mb-1">{p.title}</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{p.body}</p>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </div>
     </section>
-  );
+  )
 }

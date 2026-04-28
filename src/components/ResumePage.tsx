@@ -1,10 +1,14 @@
-import '../ResumePage.css';
+import { motion } from 'framer-motion'
+import { ArrowLeft, Mail, MapPin, Printer } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { GithubIcon, LinkedinIcon } from './icons'
 
 const highlights = [
   '14 years of professional software engineering experience',
   'Led WILD 2.0 modernization from legacy Web Forms to React + TypeScript + ASP.NET Core',
   'AI-native engineering workflow with durable memory, MCP, and agent tooling',
-];
+]
 
 const skills = [
   'C# / .NET',
@@ -18,26 +22,13 @@ const skills = [
   'AI-Native Dev',
   'MCP Protocol',
   'GitHub / CI/CD',
-];
-
-const projects = [
-  {
-    name: 'DendriteMCP',
-    summary: 'Open-source MCP server giving AI agents durable, searchable memory — persistent context across sessions.',
-    tags: ['TypeScript', 'MCP', 'AI Tooling'],
-  },
-  {
-    name: 'WILD 2.0',
-    summary: 'Full-stack modernization of a mission-critical naval inventory system from legacy ASP.NET to React + .NET Core.',
-    tags: ['React', 'C#', 'MSSQL', '.NET Core'],
-  },
-];
+]
 
 const experience = [
   {
     company: 'Serco',
     role: 'Software Engineer',
-    period: 'May 2022 - Present',
+    period: 'May 2022 – Present',
     details: [
       'Core engineer on WILD, a mission-critical naval web-based inventory management system.',
       'Led WILD 2.0 modernization from VB.NET / ASP.NET 3.5 Web Forms + Oracle to React + TypeScript + ASP.NET Core + MSSQL.',
@@ -47,7 +38,7 @@ const experience = [
   {
     company: 'Valiant Integrated Services',
     role: 'Software Engineer',
-    period: 'Sep 2021 - May 2022',
+    period: 'Sep 2021 – May 2022',
     details: [
       'Maintained and enhanced the WILD platform under active contract transition.',
       'Delivered production features and defect fixes on ASP.NET Web Forms + Oracle stack.',
@@ -56,7 +47,7 @@ const experience = [
   {
     company: 'Alliance Technical Services, Inc.',
     role: 'Software Engineer',
-    period: 'Feb 2019 - Sep 2021',
+    period: 'Feb 2019 – Sep 2021',
     details: [
       'Built and maintained inventory-management features supporting naval operational workflows.',
       'Partnered with stakeholders to turn requirements into production-ready features.',
@@ -65,7 +56,7 @@ const experience = [
   {
     company: 'Serco',
     role: 'Programmer I',
-    period: 'Feb 2013 - Nov 2017',
+    period: 'Feb 2013 – Nov 2017',
     details: [
       'Developed functionality for WILD inventory management modules.',
       'Supported VB.NET and ASP.NET Web Forms code paths in a long-running production system.',
@@ -74,132 +65,169 @@ const experience = [
   {
     company: 'L-3 Communications',
     role: 'Programmer',
-    period: '2009 - 2011',
+    period: '2009 – 2011',
     details: [
       'Developed new features for SABER, a naval inventory management system using ASP.NET + VB.NET.',
       'Performed SQL Server data cleanup and maintenance to improve data integrity.',
     ],
   },
-];
+]
 
 export default function ResumePage() {
   return (
-    <section className="resume-page">
-      <div className="resume-toolbar no-print">
-        <a className="btn btn-secondary" href="#/">Back to Portfolio</a>
-        <button className="btn btn-primary" onClick={() => window.print()} type="button">
-          Print / Save as PDF
-        </button>
+    <div className="min-h-screen bg-muted/40 pt-28 pb-16 px-4">
+      <div className="no-print mx-auto mb-6 max-w-[8.5in] flex items-center justify-between">
+        <Button asChild variant="ghost" size="sm">
+          <a href="#/">
+            <ArrowLeft className="size-4" /> Back to Portfolio
+          </a>
+        </Button>
+        <Button onClick={() => window.print()} size="sm">
+          <Printer className="size-4" /> Print / Save as PDF
+        </Button>
       </div>
 
-      <article className="resume-sheet">
-        <header className="resume-header">
-          <div>
-            <h1>Michael Fillalan</h1>
-            <p className="resume-title">Software Engineer</p>
-            <p className="resume-summary">
-              Full-stack engineer with 14 years of production experience and a drive to build
-              things that feel as good as they function. I bring a creative, hands-on approach
-              to every layer of the stack — from architecture decisions to the small UI details
-              that make software genuinely enjoyable to use. Currently deep in AI-native
-              development and looking for teams solving interesting problems.
-            </p>
+      <motion.article
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="mx-auto max-w-[8.5in] bg-white text-zinc-900 rounded-lg shadow-2xl p-12 print:shadow-none print:rounded-none print:p-10 print:max-w-none"
+      >
+        <header className="border-b border-zinc-200 pb-6 mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+            <div>
+              <h1 className="font-display text-5xl tracking-tight text-zinc-900">
+                Michael Fillalan
+              </h1>
+              <p className="text-lg text-zinc-600 mt-1">Software Engineer</p>
+            </div>
+            <div className="space-y-1 text-sm text-zinc-700">
+              <ContactRow icon={MapPin}>Virginia Beach, Virginia</ContactRow>
+              <ContactRow icon={Mail}>
+                <a href="mailto:mfillalan@gmail.com" className="hover:underline">
+                  mfillalan@gmail.com
+                </a>
+              </ContactRow>
+              <ContactRow icon={LinkedinIcon}>
+                <a
+                  href="https://www.linkedin.com/in/michael-fillalan/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="hover:underline"
+                >
+                  linkedin.com/in/michael-fillalan
+                </a>
+              </ContactRow>
+              <ContactRow icon={GithubIcon}>
+                <a
+                  href="https://github.com/mfillalan"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="hover:underline"
+                >
+                  github.com/mfillalan
+                </a>
+              </ContactRow>
+            </div>
           </div>
-          <div className="resume-contact">
-            <img
-              src="/mfillalan-portfolio/profile-photo.jpeg"
-              alt="Michael Fillalan"
-              className="resume-photo"
-            />
-            <div className="resume-contact-row">
-              <span className="resume-contact-icon">📍</span>
-              Virginia Beach, Virginia
-            </div>
-            <div className="resume-contact-row">
-              <span className="resume-contact-icon">✉</span>
-              <a href="mailto:mfillalan@gmail.com">mfillalan@gmail.com</a>
-            </div>
-            <div className="resume-contact-row">
-              <span className="resume-contact-icon">💼</span>
-              <a href="https://www.linkedin.com/in/michael-fillalan/" target="_blank" rel="noreferrer">
-                linkedin.com/in/michael-fillalan
-              </a>
-            </div>
-            <div className="resume-contact-row">
-              <span className="resume-contact-icon">⌥</span>
-              <a href="https://github.com/mfillalan" target="_blank" rel="noreferrer">
-                github.com/mfillalan
-              </a>
-            </div>
-          </div>
+          <p className="mt-6 text-zinc-700 leading-relaxed max-w-3xl">
+            Full-stack engineer with 14 years of production experience and a drive to build
+            things that feel as good as they function. I bring a creative, hands-on approach to
+            every layer of the stack — from architecture decisions to the small UI details that
+            make software genuinely enjoyable to use. Currently deep in AI-native development
+            and looking for teams solving interesting problems.
+          </p>
         </header>
 
-        <section className="resume-grid">
-          <aside className="resume-side">
-            <div className="resume-block">
-              <h2>Career Highlights</h2>
-              <ul>
-                {highlights.map((item) => (
-                  <li key={item}>{item}</li>
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-10">
+          <aside className="space-y-8">
+            <Section title="Highlights">
+              <ul className="space-y-2 text-sm text-zinc-700">
+                {highlights.map((h) => (
+                  <li key={h} className="flex gap-2">
+                    <span className="text-zinc-400 mt-1.5 size-1 rounded-full bg-current shrink-0" />
+                    <span>{h}</span>
+                  </li>
                 ))}
               </ul>
-            </div>
+            </Section>
 
-            <div className="resume-block">
-              <h2>Core Skills</h2>
-              <ul className="skill-list">
-                {skills.map((item) => (
-                  <li key={item}>{item}</li>
+            <Section title="Core Skills">
+              <div className="flex flex-wrap gap-1.5">
+                {skills.map((s) => (
+                  <Badge key={s} variant="outline" className="font-normal text-zinc-700 border-zinc-300">
+                    {s}
+                  </Badge>
                 ))}
-              </ul>
-            </div>
+              </div>
+            </Section>
 
-            <div className="resume-block hide-on-print">
-              <h2>Featured Projects</h2>
-              {projects.map((p) => (
-                <div className="resume-project-item" key={p.name}>
-                  <strong>{p.name}</strong>
-                  <p>{p.summary}</p>
-                  <div className="resume-project-tags">
-                    {p.tags.map((t) => <span key={t}>{t}</span>)}
-                  </div>
+            <Section title="Education">
+              <div className="space-y-3 text-sm">
+                <div>
+                  <p className="font-medium text-zinc-900">M.S. Information Systems</p>
+                  <p className="text-zinc-600">ECPI University · 2011 – 2012</p>
                 </div>
-              ))}
-            </div>
-
-            <div className="resume-block">
-              <h2>Education</h2>
-              <p className="resume-edu-school">ECPI University</p>
-              <p className="resume-edu-degree">
-                M.S. Information Systems<br />2011 – 2012
-              </p>
-              <p className="resume-edu-degree">
-                B.S. Computer Information Science<br />Simulation &amp; Game Programming<br />2006 – 2009
-              </p>
-            </div>
+                <div>
+                  <p className="font-medium text-zinc-900">B.S. Computer Information Science</p>
+                  <p className="text-zinc-600">Simulation & Game Programming</p>
+                  <p className="text-zinc-600">ECPI University · 2006 – 2009</p>
+                </div>
+              </div>
+            </Section>
           </aside>
 
-          <div className="resume-main">
-            <h2>Professional Experience</h2>
-            <div className="resume-timeline">
-              {experience.map((job) => (
-                <section key={`${job.company}-${job.role}`} className="resume-job">
-                  <div className="resume-job-header">
-                    <h3>{job.role}</h3>
-                    <span>{job.period}</span>
+          <div>
+            <Section title="Professional Experience">
+              <div className="space-y-6">
+                {experience.map((job) => (
+                  <div key={`${job.company}-${job.role}`}>
+                    <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1">
+                      <h3 className="font-medium text-zinc-900">{job.role}</h3>
+                      <span className="text-xs font-mono text-zinc-500">{job.period}</span>
+                    </div>
+                    <p className="text-sm text-zinc-600 mb-2">{job.company}</p>
+                    <ul className="space-y-1.5 text-sm text-zinc-700">
+                      {job.details.map((d) => (
+                        <li key={d} className="flex gap-2">
+                          <span className="text-zinc-400 mt-1.5 size-1 rounded-full bg-current shrink-0" />
+                          <span className="leading-relaxed">{d}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
-                  <p className="resume-company">{job.company}</p>
-                  <ul>
-                    {job.details.map((detail) => (
-                      <li key={detail}>{detail}</li>
-                    ))}
-                  </ul>
-                </section>
-              ))}
-            </div>
+                ))}
+              </div>
+            </Section>
           </div>
-        </section>
-      </article>
+        </div>
+      </motion.article>
+    </div>
+  )
+}
+
+function ContactRow({
+  icon: Icon,
+  children,
+}: {
+  icon: React.ComponentType<{ className?: string }>
+  children: React.ReactNode
+}) {
+  return (
+    <div className="flex items-center gap-2 justify-end sm:justify-start">
+      <Icon className="size-3.5 text-zinc-500" />
+      {children}
+    </div>
+  )
+}
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section>
+      <h2 className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500 mb-3 pb-2 border-b border-zinc-200">
+        {title}
+      </h2>
+      {children}
     </section>
-  );
+  )
 }
