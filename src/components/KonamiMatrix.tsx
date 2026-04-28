@@ -19,26 +19,48 @@ function playKnock() {
   try {
     const ctx = new AudioContext();
     const knock = (time: number) => {
-      const buf = ctx.createBuffer(1, ctx.sampleRate * 0.12, ctx.sampleRate);
+      // Noise burst for the sharp impact transient
+      const bufLen = ctx.sampleRate * 0.22;
+      const buf = ctx.createBuffer(1, bufLen, ctx.sampleRate);
       const data = buf.getChannelData(0);
       for (let i = 0; i < data.length; i++) {
-        // decaying noise burst — woody knock character
-        data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / data.length, 6);
+        const t = i / data.length;
+        data[i] = (Math.random() * 2 - 1) * Math.pow(1 - t, 2.5);
       }
       const src = ctx.createBufferSource();
       src.buffer = buf;
-      // slight low-pass to make it thuddy
+
       const filter = ctx.createBiquadFilter();
       filter.type = 'lowpass';
-      filter.frequency.value = 900;
+      filter.frequency.value = 320;
+      filter.Q.value = 3;
+
+      const noiseGain = ctx.createGain();
+      noiseGain.gain.setValueAtTime(4, time);
+      noiseGain.gain.exponentialRampToValueAtTime(0.001, time + 0.22);
+
       src.connect(filter);
-      filter.connect(ctx.destination);
+      filter.connect(noiseGain);
+      noiseGain.connect(ctx.destination);
       src.start(time);
+
+      // Low-frequency sine for door-body thud
+      const osc = ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(90, time);
+      osc.frequency.exponentialRampToValueAtTime(35, time + 0.2);
+      const oscGain = ctx.createGain();
+      oscGain.gain.setValueAtTime(2.5, time);
+      oscGain.gain.exponentialRampToValueAtTime(0.001, time + 0.25);
+      osc.connect(oscGain);
+      oscGain.connect(ctx.destination);
+      osc.start(time);
+      osc.stop(time + 0.28);
     };
+
     knock(ctx.currentTime);
-    knock(ctx.currentTime + 0.38);
-    // close context after sound finishes
-    setTimeout(() => ctx.close(), 1000);
+    knock(ctx.currentTime + 0.5);
+    setTimeout(() => ctx.close(), 1400);
   } catch {
     // AudioContext not available — silently skip
   }
