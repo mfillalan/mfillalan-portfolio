@@ -8,22 +8,16 @@ interface Project {
 
 const projects: Project[] = [
   {
-    title: 'Project One',
-    description: 'A brief description of what this project does and the problem it solves.',
-    tags: ['React', 'TypeScript', 'Node.js'],
-    repoUrl: 'https://github.com/mfillalan',
+    title: 'Dendrite MCP Server',
+    description:
+      'An AI memory and knowledge-graph project built as a Model Context Protocol (MCP) server. Dendrite gives AI agents structured, persistent memory — enabling more coherent long-running workflows and context-aware reasoning across sessions.',
+    tags: ['MCP', 'AI', 'TypeScript', 'Node.js', 'Knowledge Graph'],
   },
   {
-    title: 'Project Two',
-    description: 'A brief description of what this project does and the problem it solves.',
-    tags: ['Python', 'FastAPI', 'PostgreSQL'],
-    repoUrl: 'https://github.com/mfillalan',
-  },
-  {
-    title: 'Project Three',
-    description: 'A brief description of what this project does and the problem it solves.',
-    tags: ['Vue', 'TypeScript', 'Firebase'],
-    repoUrl: 'https://github.com/mfillalan',
+    title: 'WILD 2.0',
+    description:
+      'Led the ground-up modernisation of a mission-critical U.S. Navy web-based inventory management system. Migrated the platform from a legacy VB.NET / ASP.NET 3.5 Web Forms + Oracle stack to a fully modern architecture — React + TypeScript front end, ASP.NET Core API, and MSSQL database.',
+    tags: ['React', 'TypeScript', 'ASP.NET Core', 'MSSQL', 'C#'],
   },
 ];
 

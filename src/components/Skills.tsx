@@ -1,15 +1,23 @@
 const skillGroups = [
   {
     category: 'Languages',
-    skills: ['TypeScript', 'JavaScript', 'Python', 'HTML', 'CSS'],
+    skills: ['TypeScript', 'JavaScript', 'C#', 'VB.NET', 'HTML', 'CSS'],
   },
   {
     category: 'Frameworks & Libraries',
-    skills: ['React', 'Node.js', 'Express', 'Vite'],
+    skills: ['React', 'ASP.NET Core', 'Next.js', 'Vue', 'Knockout.js', 'Vite'],
   },
   {
-    category: 'Tools & Platforms',
-    skills: ['Git', 'GitHub', 'Docker', 'VS Code', 'Linux'],
+    category: 'Databases',
+    skills: ['MSSQL', 'Oracle', 'SQL Server'],
+  },
+  {
+    category: 'UI & Tooling',
+    skills: ['shadcn/ui', 'Git', 'GitHub', 'REST APIs', 'MVC'],
+  },
+  {
+    category: 'AI & Emerging',
+    skills: ['AI-Native Development', 'MCP (Model Context Protocol)', 'LLM Integration', 'Prompt Engineering'],
   },
 ];
 

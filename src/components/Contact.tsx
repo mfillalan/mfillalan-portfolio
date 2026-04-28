@@ -6,7 +6,7 @@ export default function Contact() {
         <p>I'm currently open to new opportunities. Feel free to reach out!</p>
         <div className="contact-links">
           <a
-            href="mailto:your.email@example.com"
+            href="mailto:mfillalan@gmail.com"
             className="btn btn-primary"
           >
             Email Me
@@ -20,7 +20,7 @@ export default function Contact() {
             GitHub
           </a>
           <a
-            href="https://linkedin.com/in/mfillalan"
+            href="https://linkedin.com/in/michael-fillalan"
             target="_blank"
             rel="noreferrer"
             className="btn btn-secondary"
