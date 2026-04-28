@@ -4,7 +4,9 @@ import '../ProjectModal.css';
 export interface ProjectDetail {
   title: string;
   summary: string;
+  role: string;
   details: string;
+  impact?: string;
   tags: string[];
   screenshots: string[];
   repoUrl?: string;
@@ -73,7 +75,22 @@ export default function ProjectModal({ project, onClose }: Props) {
           </div>
         )}
 
-        <p className="modal-details">{project.details}</p>
+        <div className="modal-section">
+          <h3>My Role</h3>
+          <p className="modal-details">{project.role}</p>
+        </div>
+
+        <div className="modal-section">
+          <h3>What I Built</h3>
+          <p className="modal-details">{project.details}</p>
+        </div>
+
+        {project.impact && (
+          <div className="modal-section">
+            <h3>Impact</h3>
+            <p className="modal-details">{project.impact}</p>
+          </div>
+        )}
 
         <div className="modal-links">
           {project.repoUrl && (
