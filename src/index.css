@@ -2,6 +2,7 @@
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+html { scroll-behavior: smooth; }
 :root {
   --bg: #f8f4eb;
   --bg-alt: #efe7d8;

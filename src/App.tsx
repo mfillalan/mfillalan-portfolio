@@ -9,11 +9,15 @@ import Education from './components/Education'
 import Experience from './components/Experience'
 import Contact from './components/Contact'
 import ResumePage from './components/ResumePage'
+import MagneticParticles from './components/MagneticParticles'
+import KonamiMatrix from './components/KonamiMatrix'
 
 type ThemeMode = 'editorial' | 'brutalist' | 'studio'
 
 function App() {
-  const [theme, setTheme] = useState<ThemeMode>('editorial')
+  const [theme, setTheme] = useState<ThemeMode>(() =>
+    window.matchMedia('(prefers-color-scheme: dark)').matches ? 'studio' : 'editorial'
+  )
   const [isResumeRoute, setIsResumeRoute] = useState(() =>
     window.location.hash.startsWith('#/resume'),
   )
@@ -35,6 +39,8 @@ function App() {
 
   return (
     <>
+      <KonamiMatrix />
+      <MagneticParticles />
       {!isResumeRoute && (
         <aside className="theme-switcher" aria-label="Theme switcher">
           <span>Style Lab</span>
@@ -81,6 +87,7 @@ function App() {
       </main>
       <footer className="footer">
         <p>&copy; {new Date().getFullYear()} mfillalan. All rights reserved.</p>
+        <span className="konami-hint" title="Try the Konami code: ↑↑↓↓←→←→BA">⌨</span>
       </footer>
     </>
   )

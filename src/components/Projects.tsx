@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useScrollReveal } from '../hooks/useScrollReveal';
 import ProjectModal, { type ProjectDetail } from './ProjectModal';
 
 const projects: ProjectDetail[] = [
@@ -31,10 +32,11 @@ const projects: ProjectDetail[] = [
 ];
 
 export default function Projects() {
+  const ref = useScrollReveal();
   const [selected, setSelected] = useState<ProjectDetail | null>(null);
 
   return (
-    <section id="projects" className="section section-alt">
+    <section id="projects" className="section section-alt reveal" ref={ref as React.RefObject<HTMLElement>}>
       <div className="container">
         <h2 className="section-title">Projects</h2>
         <div className="projects-grid">
@@ -46,6 +48,14 @@ export default function Projects() {
               role="button"
               tabIndex={0}
               onKeyDown={(e) => e.key === 'Enter' && setSelected(project)}
+              onMouseMove={(e) => {
+                const el = e.currentTarget;
+                const rect = el.getBoundingClientRect();
+                const x = (e.clientY - rect.top) / rect.height - 0.5;
+                const y = (e.clientX - rect.left) / rect.width - 0.5;
+                el.style.transform = `perspective(700px) rotateX(${-x * 10}deg) rotateY(${y * 10}deg) translateY(-4px)`;
+              }}
+              onMouseLeave={(e) => { e.currentTarget.style.transform = ''; }}
             >
               <h3>{project.title}</h3>
               <p>{project.summary}</p>

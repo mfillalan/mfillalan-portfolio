@@ -1,3 +1,5 @@
+import { useScrollReveal } from '../hooks/useScrollReveal';
+
 interface Job {
   company: string;
   role: string;
@@ -56,8 +58,9 @@ const experience: Job[] = [
 ];
 
 export default function Experience() {
+  const ref = useScrollReveal();
   return (
-    <section id="experience" className="section section-alt">
+    <section id="experience" className="section section-alt reveal" ref={ref as React.RefObject<HTMLElement>}>
       <div className="container">
         <h2 className="section-title">Work Experience</h2>
         <div className="timeline">

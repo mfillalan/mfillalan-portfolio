@@ -21,14 +21,17 @@ const skillGroups = [
   },
 ];
 
+import { useScrollReveal } from '../hooks/useScrollReveal';
+
 export default function Skills() {
+  const ref = useScrollReveal();
   return (
-    <section id="skills" className="section">
+    <section id="skills" className="section reveal" ref={ref as React.RefObject<HTMLElement>}>
       <div className="container">
         <h2 className="section-title">Skills &amp; Tech Stack</h2>
         <div className="skills-grid">
-          {skillGroups.map((group) => (
-            <div key={group.category} className="skill-group">
+          {skillGroups.map((group, i) => (
+            <div key={group.category} className="skill-group" style={{ transitionDelay: `${i * 0.07}s` }}>
               <h3>{group.category}</h3>
               <div className="tags">
                 {group.skills.map((skill) => (

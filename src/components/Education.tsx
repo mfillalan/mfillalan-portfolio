@@ -14,9 +14,12 @@ const degrees = [
   },
 ];
 
+import { useScrollReveal } from '../hooks/useScrollReveal';
+
 export default function Education() {
+  const ref = useScrollReveal();
   return (
-    <section id="education" className="section">
+    <section id="education" className="section reveal" ref={ref as React.RefObject<HTMLElement>}>
       <div className="container">
         <h2 className="section-title">Education</h2>
         <div className="education-list">

@@ -122,15 +122,176 @@ main.resume-route::before {
   background: rgba(255, 253, 247, 0.85);
 }
 
+/* ---- Terminal Typer ---- */
+.terminal-window {
+  background: #0d1117;
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 1.4rem 0 1.6rem;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+}
+
+.terminal-bar {
+  background: #1c1e26;
+  padding: 0.55rem 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.t-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.t-red    { background: #ff5f57; }
+.t-yellow { background: #febc2e; }
+.t-green  { background: #28c840; }
+
+.t-title {
+  margin-left: auto;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.28);
+  font-family: 'Manrope', sans-serif;
+  letter-spacing: 0.05em;
+}
+
+.terminal-body {
+  padding: 0.9rem 1.1rem 1rem;
+  min-height: 90px;
+  max-height: 190px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.t-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.45rem;
+  line-height: 1.7;
+}
+
+.t-prompt {
+  color: #3fb950;
+  font-size: 0.82rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.t-cmd {
+  color: #e6edf3;
+  font-size: 0.82rem;
+}
+
+.t-output {
+  width: 100%;
+  padding-left: 1.25rem;
+  color: #8b949e;
+  font-size: 0.78rem;
+  line-height: 1.6;
+  white-space: pre;
+}
+
+.t-cursor {
+  display: inline-block;
+  width: 8px;
+  height: 15px;
+  background: #3fb950;
+  vertical-align: middle;
+  border-radius: 1px;
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+/* ---- Scroll Reveal ---- */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.55s ease, transform 0.55s ease;
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-delay-1 { transition-delay: 0.08s; }
+.reveal-delay-2 { transition-delay: 0.16s; }
+.reveal-delay-3 { transition-delay: 0.24s; }
+.reveal-delay-4 { transition-delay: 0.32s; }
+
+/* Stagger children when parent section reveals */
+.reveal.visible .skill-group,
+.reveal.visible .card,
+.reveal.visible .timeline-item,
+.reveal.visible .education-card {
+  animation: slideUp 0.45s ease both;
+}
+
+.reveal.visible .skill-group:nth-child(1),
+.reveal.visible .card:nth-child(1),
+.reveal.visible .timeline-item:nth-child(1),
+.reveal.visible .education-card:nth-child(1) { animation-delay: 0.05s; }
+.reveal.visible .skill-group:nth-child(2),
+.reveal.visible .card:nth-child(2),
+.reveal.visible .timeline-item:nth-child(2),
+.reveal.visible .education-card:nth-child(2) { animation-delay: 0.12s; }
+.reveal.visible .skill-group:nth-child(3),
+.reveal.visible .card:nth-child(3),
+.reveal.visible .timeline-item:nth-child(3),
+.reveal.visible .education-card:nth-child(3) { animation-delay: 0.19s; }
+.reveal.visible .skill-group:nth-child(4),
+.reveal.visible .card:nth-child(4),
+.reveal.visible .timeline-item:nth-child(4),
+.reveal.visible .education-card:nth-child(4) { animation-delay: 0.26s; }
+.reveal.visible .skill-group:nth-child(5),
+.reveal.visible .timeline-item:nth-child(5) { animation-delay: 0.33s; }
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ---- Magnetic Buttons ---- */
+.magnetic-wrap {
+  display: inline-block;
+  transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
 /* Hero */
 .hero {
-  min-height: calc(100vh - 120px);
+  position: relative;
   display: flex;
   align-items: center;
   padding: 3.5rem 0 4.25rem;
 }
 
+/* Grain / noise overlay on the whole hero background */
+.hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.78' numOctaves='4' stitchTiles='stitch'/></filter><rect width='300' height='300' filter='url(%23n)'/></svg>");
+  opacity: 0.055;
+  pointer-events: none;
+  z-index: 0;
+  border-radius: inherit;
+}
+
 .hero-content {
+  position: relative;
+  z-index: 1;
   width: min(820px, 100%);
   margin: 0 auto;
   background: rgba(255, 253, 247, 0.72);
@@ -570,3 +731,133 @@ main.resume-route::before {
     min-width: 0;
   }
 }
+
+/* ─── Nav Active Link ────────────────────────────────────────── */
+.nav-active {
+  color: var(--accent) !important;
+  font-weight: 700;
+}
+
+/* ─── Copy Email Toast ───────────────────────────────────────── */
+.toast {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(0);
+  background: var(--text);
+  color: var(--bg);
+  padding: 0.55rem 1.4rem;
+  border-radius: 99px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  z-index: 9999;
+  pointer-events: none;
+  animation: toastIn 0.22s ease, toastOut 0.22s ease 1.6s forwards;
+}
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(12px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+@keyframes toastOut {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+/* ─── 3D Card Tilt ───────────────────────────────────────────── */
+.card {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+/* ─── Konami Matrix Overlay ──────────────────────────────────── */
+.konami-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.93);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.4s ease;
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.konami-terminal {
+  font-family: 'Courier New', monospace;
+  color: #00ff41;
+  font-size: clamp(1.1rem, 3vw, 1.8rem);
+  line-height: 2;
+  text-shadow: 0 0 12px #00ff41, 0 0 30px #00cc33;
+  max-width: 600px;
+  padding: 2rem;
+  text-align: left;
+}
+.konami-line {
+  opacity: 1;
+  min-height: 1.2em;
+}
+.konami-cursor {
+  display: inline-block;
+  animation: blink 0.8s step-end infinite;
+  color: #00ff41;
+}
+@keyframes blink {
+  50% { opacity: 0; }
+}
+.konami-dismiss {
+  margin-top: 2rem;
+  font-size: 0.7rem;
+  color: #00cc33;
+  opacity: 0.6;
+  letter-spacing: 0.05em;
+}
+
+/* ─── Konami HUD ─────────────────────────────────────────────── */
+.konami-hud {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.45rem;
+  align-items: center;
+  z-index: 9998;
+  pointer-events: none;
+  background: rgba(0, 0, 0, 0.65);
+  padding: 0.45rem 1rem;
+  border-radius: 99px;
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(0, 255, 65, 0.15);
+}
+.konami-key {
+  font-family: 'Courier New', monospace;
+  font-size: 1rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.18);
+  display: inline-block;
+  transition: color 0.1s ease, text-shadow 0.1s ease;
+}
+.konami-key-done {
+  color: #00ff41;
+  text-shadow: 0 0 8px #00ff41;
+}
+.konami-key-scatter {
+  animation: konamiScatter 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+@keyframes konamiScatter {
+  0%   { opacity: 1; transform: translate(0, 0) rotate(0deg); }
+  100% { opacity: 0; transform: translate(var(--tx), var(--ty)) rotate(var(--rot)); }
+}
+.konami-hint {
+  font-size: 0.75rem;
+  opacity: 0.25;
+  cursor: default;
+  user-select: none;
+  margin-left: 0.75rem;
+  transition: opacity 0.2s;
+}
+.konami-hint:hover { opacity: 0.7; }
