@@ -120,8 +120,8 @@ export default function KonamiMatrix() {
 
   return (
     <>
-      {/* Progress HUD */}
-      {progress > 0 && (
+      {/* Progress HUD — only reveal after ↑↑ */}
+      {progress >= 2 && (
         <div className="konami-hud">
           {SYMBOLS.map((sym, i) => {
             const done = i < progress;
