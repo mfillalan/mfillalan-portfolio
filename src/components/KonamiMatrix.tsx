@@ -15,6 +15,35 @@ const LINE_PAUSE = 700;
 
 type ScatterStyle = { tx: number; ty: number; rot: number };
 
+function playKnock() {
+  try {
+    const ctx = new AudioContext();
+    const knock = (time: number) => {
+      const buf = ctx.createBuffer(1, ctx.sampleRate * 0.12, ctx.sampleRate);
+      const data = buf.getChannelData(0);
+      for (let i = 0; i < data.length; i++) {
+        // decaying noise burst — woody knock character
+        data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / data.length, 6);
+      }
+      const src = ctx.createBufferSource();
+      src.buffer = buf;
+      // slight low-pass to make it thuddy
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.value = 900;
+      src.connect(filter);
+      filter.connect(ctx.destination);
+      src.start(time);
+    };
+    knock(ctx.currentTime);
+    knock(ctx.currentTime + 0.38);
+    // close context after sound finishes
+    setTimeout(() => ctx.close(), 1000);
+  } catch {
+    // AudioContext not available — silently skip
+  }
+}
+
 export default function KonamiMatrix() {
   const [active, setActive] = useState(false);
   const [lines, setLines] = useState<string[]>([]);
@@ -105,8 +134,14 @@ export default function KonamiMatrix() {
       elapsed += LINE_PAUSE;
     });
 
-    const autoDismiss = setTimeout(dismiss, elapsed + 3000);
-    timersRef.current.push(autoDismiss);
+    // After typing finishes: wait 2s, play knock-knock, then dismiss
+    const knockDelay = elapsed + 2000;
+    const knockTimer = setTimeout(() => {
+      playKnock();
+      const dismissTimer = setTimeout(dismiss, 1400);
+      timersRef.current.push(dismissTimer);
+    }, knockDelay);
+    timersRef.current.push(knockTimer);
 
     return () => {
       timersRef.current.forEach(clearTimeout);
