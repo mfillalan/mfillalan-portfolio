@@ -133,7 +133,7 @@ export default function ResumePage() {
           <p className="mt-6 text-zinc-700 leading-relaxed max-w-3xl">
             Full-stack engineer with 14 years of production experience and a drive to build
             things that feel as good as they function. I bring a creative, hands-on approach to
-            every layer of the stack — from architecture decisions to the small UI details that
+            every layer of the stack, from architecture decisions to the small UI details that
             make software genuinely enjoyable to use. Currently deep in AI-native development
             and looking for teams solving interesting problems.
           </p>

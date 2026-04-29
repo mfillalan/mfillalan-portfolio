@@ -16,7 +16,7 @@ const experience: Job[] = [
     period: 'May 2022 – Present',
     bullets: [
       'Core engineer on WILD, a mission-critical naval web-based inventory management system used across U.S. Navy programs.',
-      'Led the full ground-up modernization of the legacy platform (WILD 2.0) — migrating from VB.NET / ASP.NET 3.5 Web Forms + Oracle to React, TypeScript, ASP.NET Core, and MSSQL.',
+      'Led the full ground-up modernization of the legacy platform (WILD 2.0), migrating from VB.NET / ASP.NET 3.5 Web Forms + Oracle to React, TypeScript, ASP.NET Core, and MSSQL.',
       'Architected front-end component structure, API contracts, and data migration strategy for WILD 2.0.',
       'Transitioned to AI-native development practices, integrating AI tooling deeply into the engineering workflow to accelerate delivery and code quality.',
     ],
@@ -62,8 +62,8 @@ const experience: Job[] = [
 export default function Experience() {
   const containerRef = useRef<HTMLDivElement>(null)
   // useScroll tracks how far the timeline section has progressed through viewport.
-  // offset describes when 0% and 100% should fire — here as element top hits
-  // viewport center until element bottom leaves viewport top.
+  // offset describes when 0% and 100% should fire: here as the element top hits
+  // viewport center until the element bottom leaves viewport top.
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ['start 60%', 'end 50%'],
@@ -83,7 +83,7 @@ export default function Experience() {
           className="max-w-2xl mb-16"
         >
           <p className="font-mono text-xs uppercase tracking-[0.2em] text-primary mb-4">
-            04 — Experience
+            04 / Experience
           </p>
           <h2 className="font-display text-4xl sm:text-5xl tracking-tight text-balance">
             14 years of shipping.
@@ -93,7 +93,7 @@ export default function Experience() {
         <div ref={containerRef} className="relative">
           {/* Track */}
           <div className="absolute left-3 sm:left-4 top-2 bottom-2 w-px bg-border" />
-          {/* Filled progress — animated via useScroll */}
+          {/* Filled progress, animated via useScroll. */}
           <motion.div
             style={{ scaleY: lineScale, transformOrigin: 'top' }}
             className="absolute left-3 sm:left-4 top-2 bottom-2 w-px bg-primary"

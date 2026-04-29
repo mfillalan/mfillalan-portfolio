@@ -31,7 +31,7 @@ export default function Contact() {
 
           <div className="relative">
             <p className="font-mono text-xs uppercase tracking-[0.2em] text-primary mb-4">
-              06 — Contact
+              06 / Contact
             </p>
             <h2 className="font-display text-4xl sm:text-6xl tracking-tight text-balance mb-4">
               Let's build something <em className="italic text-primary">good.</em>

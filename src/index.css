@@ -60,7 +60,7 @@
 }
 
 .dark {
-  /* Dark mode — refined near-black with violet accent */
+  /* Dark mode. Refined near-black with violet accent. */
   --background: oklch(0.13 0.015 270);
   --foreground: oklch(0.96 0.01 95);
   --card: oklch(0.17 0.018 270);
@@ -146,7 +146,7 @@
   }
 }
 
-/* Konami easter egg styles — preserved from prior design */
+/* Konami easter egg styles, preserved from prior design. */
 .konami-hud {
   position: fixed;
   bottom: 1.5rem;
@@ -189,28 +189,78 @@
   transition: transform 0.5s ease-out, opacity 0.5s;
 }
 
+/* Konami CRT overlay. The whole viewport is styled to feel like an old
+   phosphor monitor. Layered effects:
+     1. Dark base background ("screen-off black with a slight blue cast")
+     2. ::before is the phosphor wash + repeating scanlines
+     3. ::after is the vignette darkening corners (CRT curvature illusion)
+     4. .konami-terminal is the green text positioned top-left like a boot prompt
+*/
 .konami-overlay {
   position: fixed;
   inset: 0;
-  background: rgb(0 0 0 / 0.92);
+  background: #050708;
   z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-mono);
   cursor: pointer;
+  font-family: var(--font-mono);
+  overflow: hidden;
+  /* Power-on animation: scales from a horizontal line to full screen
+     with a brief brightness flare, mimicking a CRT warming up. */
+  animation: crt-power-on 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-origin: center;
+}
+
+.konami-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background:
+    radial-gradient(ellipse 70% 70% at center, rgba(0, 80, 35, 0.20) 0%, transparent 70%),
+    repeating-linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0) 0px,
+      rgba(0, 0, 0, 0) 2px,
+      rgba(0, 0, 0, 0.32) 2px,
+      rgba(0, 0, 0, 0.32) 3px
+    );
+}
+
+.konami-overlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  background: radial-gradient(
+    ellipse 100% 100% at center,
+    transparent 50%,
+    rgba(0, 0, 0, 0.55) 88%,
+    rgba(0, 0, 0, 0.95) 100%
+  );
 }
 
 .konami-terminal {
-  color: #00ff66;
-  text-shadow: 0 0 8px #00ff66;
-  font-size: clamp(1rem, 2.4vw, 1.5rem);
-  max-width: 800px;
-  padding: 2rem;
+  position: absolute;
+  top: clamp(1.5rem, 5vh, 3rem);
+  left: clamp(1.5rem, 5vw, 3rem);
+  right: clamp(1.5rem, 5vw, 3rem);
+  color: #2eff7e;
+  /* Three-layer phosphor glow */
+  text-shadow:
+    0 0 4px rgba(46, 255, 126, 0.9),
+    0 0 12px rgba(46, 255, 126, 0.5),
+    0 0 24px rgba(46, 255, 126, 0.25);
+  font-size: clamp(0.95rem, 1.7vw, 1.4rem);
+  line-height: 1.4;
+  z-index: 3;
+  /* Subtle phosphor flicker */
+  animation: crt-flicker 5s ease-in-out infinite;
 }
 
 .konami-line {
-  margin: 0 0 0.6rem;
+  margin: 0 0 0.3rem;
 }
 
 .konami-cursor {
@@ -220,15 +270,43 @@
 }
 
 .konami-dismiss {
-  margin-top: 2rem;
-  color: #00ff6688;
-  font-size: 0.85rem;
+  position: absolute;
+  bottom: clamp(1.25rem, 4vh, 2.5rem);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  color: rgba(46, 255, 126, 0.4);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-align: center;
+  text-shadow:
+    0 0 4px rgba(46, 255, 126, 0.7),
+    0 0 12px rgba(46, 255, 126, 0.35);
+  /* Inherit the same flicker as the main terminal text */
+  animation: crt-flicker 5s ease-in-out infinite;
 }
 
 @keyframes konami-blink {
   to {
     visibility: hidden;
   }
+}
+
+@keyframes crt-power-on {
+  0%   { transform: scaleY(0.001); opacity: 0; filter: brightness(3); }
+  30%  { transform: scaleY(0.04);  opacity: 1; filter: brightness(2.5); }
+  55%  { transform: scaleY(1.02);              filter: brightness(1.4); }
+  100% { transform: scaleY(1);                 filter: brightness(1); opacity: 1; }
+}
+
+@keyframes crt-flicker {
+  0%, 100% { opacity: 1; }
+  12% { opacity: 0.96; }
+  14% { opacity: 1; }
+  31% { opacity: 0.92; }
+  33% { opacity: 1; }
+  68% { opacity: 0.97; }
+  70% { opacity: 1; }
 }
 
 /* Print rules for resume */

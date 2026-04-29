@@ -24,24 +24,29 @@ interface Boid {
   angle: number
 }
 
-const COUNT = 110
+const COUNT = 135
 const PERCEIVE = 55
 const SEPARATE = 22
 const FLEE_RADIUS = 130
 const MAX_SPEED = 1.8
 const MAX_FORCE = 0.045
-// Always-alive floor — every boid keeps drifting. Without this, shelter
+// Always-alive floor: every boid keeps drifting. Without this, shelter
 // boids would dampen to a halt and look dead.
 const MIN_SPEED = 0.55
 
-// Shelters — DOM elements with [data-boid-shelter] attract nearby boids.
+// Shelters: DOM elements with [data-boid-shelter] attract nearby boids.
 // Boids slow down once they reach the rest band so they cluster instead
 // of orbiting. The cursor's flee force naturally disperses them.
+// Optional [data-boid-shelter-color="r, g, b"] tints boids that get close,
+// so e.g. the shadcn chip glows white-gray and the Tailwind chip cyan.
 const SHELTER_REACH = 230
 const SHELTER_REST = 35
 const W_SHELTER = 0.7
+// Color tint kicks in only when very close (so the surrounding flock stays
+// neutral and the tint reads as recognition of the chip).
+const SHELTER_TINT_RADIUS = 95
 
-// Orbital shelters — [data-boid-orbit] pulls boids into a constantly-moving
+// Orbital shelters: [data-boid-orbit] pulls boids into a constantly-moving
 // ring around the element. Physics model: a radial spring keeps them on the
 // ring while a tangential velocity setpoint keeps every orbiter moving at the
 // SAME angular speed. Same angular speed = same relative spacing forever, so
@@ -52,7 +57,7 @@ const ORBIT_RADIUS = 62
 const ORBIT_RADIAL_K = 0.025
 const ORBIT_TANGENT_K = 0.09
 
-// Behavior weights — tuning knobs.
+// Behavior weights (tuning knobs).
 const W_SEPARATION = 1.4
 const W_ALIGNMENT = 0.95
 const W_COHESION = 0.85
@@ -96,8 +101,12 @@ export default function AmbientParticles() {
     }
 
     const onResize = () => {
+      // Mobile browsers (esp. Android Chrome) fire `resize` on every URL bar
+      // show/hide during scroll. Reseeding on those events would teleport the
+      // entire flock on every scroll. So: just resize the canvas; leave boids
+      // alone. Any boids now outside the new bounds will wrap on the next
+      // tick, so no visible glitch.
       resize()
-      seed()
     }
 
     const onMove = (e: MouseEvent) => {
@@ -120,6 +129,15 @@ export default function AmbientParticles() {
     const isDark = () => document.documentElement.classList.contains('dark')
 
     const tick = () => {
+      // Pause when the tab is hidden (battery / CPU) and when something on
+      // the page (e.g. an opening modal) sets the pause flag. The Projects
+      // dialog uses this so the layoutId morph isn't competing with 18k+
+      // neighbor checks per frame and noticeably stuttering.
+      if (document.hidden || document.documentElement.dataset.boidsPaused === '1') {
+        raf = requestAnimationFrame(tick)
+        return
+      }
+
       const w = window.innerWidth
       const h = window.innerHeight
       ctx.clearRect(0, 0, w, h)
@@ -130,36 +148,54 @@ export default function AmbientParticles() {
       // Snapshot active shelters this frame. Cheap for a handful of elements
       // and ensures positions track through scroll, magnetic pull, layout shifts.
       const shelterEls = document.querySelectorAll<HTMLElement>('[data-boid-shelter]')
-      const shelters: Array<{ x: number; y: number }> = []
+      const shelters: Array<{ x: number; y: number; color?: string }> = []
       shelterEls.forEach((el) => {
         const r = el.getBoundingClientRect()
         if (r.bottom < 0 || r.top > h || r.right < 0 || r.left > w) return
-        shelters.push({ x: r.left + r.width / 2, y: r.top + r.height / 2 })
+        shelters.push({
+          x: r.left + r.width / 2,
+          y: r.top + r.height / 2,
+          color: el.dataset.boidShelterColor,
+        })
       })
 
+      // Each orbit element can specify its own color + radius via data attrs:
+      //   data-boid-orbit-color="r, g, b"  (default green Konami palette)
+      //   data-boid-orbit-radius="78"      (default ORBIT_RADIUS)
       const orbitEls = document.querySelectorAll<HTMLElement>('[data-boid-orbit]')
-      const orbits: Array<{ x: number; y: number }> = []
+      const orbits: Array<{ x: number; y: number; radius: number; color: string }> = []
       orbitEls.forEach((el) => {
         const r = el.getBoundingClientRect()
         if (r.bottom < 0 || r.top > h || r.right < 0 || r.left > w) return
-        orbits.push({ x: r.left + r.width / 2, y: r.top + r.height / 2 })
+        const color = el.dataset.boidOrbitColor ?? '80, 255, 140'
+        const radius = Number(el.dataset.boidOrbitRadius) || ORBIT_RADIUS
+        orbits.push({ x: r.left + r.width / 2, y: r.top + r.height / 2, radius, color })
       })
 
       // Compute new accelerations from neighbor interactions
-      const next: Array<{ ax: number; ay: number; alarm: number; orbiting: number }> = []
+      const next: Array<{
+        ax: number
+        ay: number
+        alarm: number
+        orbiting: number
+        orbitColor: string
+        shelterTint?: string
+        shelterTintProx: number
+      }> = []
       for (let i = 0; i < boids.length; i++) {
         const b = boids[i]
 
-        // Orbital influence first — orbiting boids skip cohesion (otherwise
+        // Orbital influence first; orbiting boids skip cohesion (otherwise
         // the ring collapses into a knot). Two forces:
         //   - Radial spring drives them onto the orbit ring.
         //   - Tangential setpoint forces every orbiter to share the SAME
         //     angular speed → constant relative spacing forever.
         let orbiting = 0
+        let orbitColor = '80, 255, 140'
         let orbitAx = 0
         let orbitAy = 0
         if (orbits.length > 0) {
-          let oCx = 0, oCy = 0, oD = Infinity
+          let oCx = 0, oCy = 0, oD = Infinity, oR = ORBIT_RADIUS, oColor = orbitColor
           for (const o of orbits) {
             const dx = o.x - b.x
             const dy = o.y - b.y
@@ -168,6 +204,8 @@ export default function AmbientParticles() {
               oD = d
               oCx = o.x
               oCy = o.y
+              oR = o.radius
+              oColor = o.color
             }
           }
           if (oD < ORBIT_REACH && oD > 0.5) {
@@ -178,7 +216,7 @@ export default function AmbientParticles() {
             const tdx = -rdy
             const tdy = rdx
             // Radial: error positive when too far from center, pulls inward
-            const radialErr = oD - ORBIT_RADIUS
+            const radialErr = oD - oR
             orbitAx += rdx * radialErr * ORBIT_RADIAL_K
             orbitAy += rdy * radialErr * ORBIT_RADIAL_K
             // Tangent: drive current tangent-velocity component toward
@@ -189,6 +227,7 @@ export default function AmbientParticles() {
             orbitAx += tdx * tangentDelta * ORBIT_TANGENT_K
             orbitAy += tdy * tangentDelta * ORBIT_TANGENT_K
             orbiting = Math.max(0, 1 - oD / ORBIT_REACH)
+            orbitColor = oColor
           }
         }
 
@@ -255,12 +294,17 @@ export default function AmbientParticles() {
           ay += ly * W_COHESION * cohScale
         }
 
-        // Shelter attraction — soft pull toward the nearest in-viewport
+        // Shelter attraction: soft pull toward the nearest in-viewport
         // shelter. Beyond SHELTER_REACH there's no influence at all.
+        // Also tracks the nearest shelter's color so the boid can be tinted
+        // when it gets close to a labeled chip (shadcn/ui, Tailwind, etc.).
+        let shelterTint: string | undefined
+        let shelterTintProx = 0
         if (shelters.length > 0) {
           let nearestDx = 0
           let nearestDy = 0
           let nearestD = Infinity
+          let nearestColor: string | undefined
           for (const s of shelters) {
             const dx = s.x - b.x
             const dy = s.y - b.y
@@ -269,11 +313,9 @@ export default function AmbientParticles() {
               nearestD = d
               nearestDx = dx
               nearestDy = dy
+              nearestColor = s.color
             }
           }
-          // Pull toward shelter, but never to a full stop — once near, the
-          // attraction softens. Combined with MIN_SPEED enforcement below,
-          // boids drift gently around the button instead of going still.
           if (nearestD < SHELTER_REACH && nearestD > SHELTER_REST) {
             const desiredX = (nearestDx / nearestD) * MAX_SPEED
             const desiredY = (nearestDy / nearestD) * MAX_SPEED
@@ -284,9 +326,15 @@ export default function AmbientParticles() {
             ax += lx * W_SHELTER * pull
             ay += ly * W_SHELTER * pull
           }
+          // Tint independently of pull, only when truly close to a colored
+          // shelter, so the rest of the flock stays neutral.
+          if (nearestColor && nearestD < SHELTER_TINT_RADIUS) {
+            shelterTint = nearestColor
+            shelterTintProx = 1 - nearestD / SHELTER_TINT_RADIUS
+          }
         }
 
-        // Predator flee — strong steer away from cursor
+        // Predator flee: strong steer away from cursor.
         let alarm = 0
         if (mouse.active) {
           const dx = b.x - mouse.x
@@ -305,10 +353,11 @@ export default function AmbientParticles() {
           }
         }
 
-        next.push({ ax, ay, alarm, orbiting })
+        next.push({ ax, ay, alarm, orbiting, orbitColor, shelterTint, shelterTintProx })
       }
 
-      // Apply accelerations, integrate, draw
+      // Integrate physics + update headings (no drawing here so we can render
+      // the same simulation onto multiple canvases below).
       for (let i = 0; i < boids.length; i++) {
         const b = boids[i]
         const n = next[i]
@@ -322,7 +371,6 @@ export default function AmbientParticles() {
         const liveSpd = Math.hypot(b.vx, b.vy)
         if (liveSpd < MIN_SPEED) {
           if (liveSpd < 0.001) {
-            // Truly stalled — kick in a random direction
             const a = Math.random() * Math.PI * 2
             b.vx = Math.cos(a) * MIN_SPEED
             b.vy = Math.sin(a) * MIN_SPEED
@@ -336,10 +384,6 @@ export default function AmbientParticles() {
         b.x += b.vx
         b.y += b.vy
 
-        // Wrap edges so the flock orbits forever — UNLESS this boid is
-        // actively orbiting a shelter that sits near a screen edge. Wrapping
-        // would teleport it out of orbit reach and break the ring; instead,
-        // let it swing briefly off-screen and the radial spring pulls it back.
         if (n.orbiting < 0.05) {
           if (b.x < -10) b.x = w + 10
           else if (b.x > w + 10) b.x = -10
@@ -347,46 +391,97 @@ export default function AmbientParticles() {
           else if (b.y > h + 10) b.y = -10
         }
 
-        // Update heading. Atan2 is unstable when velocity is near zero — tiny
-        // numerical noise spins boids randomly. So: only retarget when moving
-        // meaningfully, and always interpolate (shortest-arc) toward the target
-        // so direction changes look like a turn, not a teleport.
+        // Update heading with shortest-arc interpolation. Atan2 is unstable
+        // near zero velocity (tiny noise spins boids randomly), so only
+        // retarget when moving meaningfully.
         const speed = Math.hypot(b.vx, b.vy)
         if (speed > 0.18) {
           const target = Math.atan2(b.vy, b.vx)
           let diff = target - b.angle
-          // Normalize to (-π, π] so we always rotate the short way.
           while (diff > Math.PI) diff -= Math.PI * 2
           while (diff < -Math.PI) diff += Math.PI * 2
           b.angle += diff * 0.18
         }
-
-        // Draw arrowhead in current heading. Orbiting boids get a green glow.
-        const size = 4 + n.alarm * 1.5
-        ctx.save()
-        ctx.translate(b.x, b.y)
-        ctx.rotate(b.angle)
-        if (n.orbiting > 0.15) {
-          ctx.shadowColor = 'rgba(0, 255, 102, 0.95)'
-          ctx.shadowBlur = 8 + n.orbiting * 8
-          ctx.fillStyle = `rgba(80, 255, 140, ${0.55 + n.orbiting * 0.4})`
-        } else {
-          ctx.fillStyle = n.alarm > 0.05 ? fleeFill : fill
-        }
-        ctx.beginPath()
-        ctx.moveTo(size, 0)
-        ctx.lineTo(-size * 0.7, size * 0.55)
-        ctx.lineTo(-size * 0.4, 0)
-        ctx.lineTo(-size * 0.7, -size * 0.55)
-        ctx.closePath()
-        ctx.fill()
-        ctx.restore()
       }
+
+      // Per-boid draw. Position is in screen coordinates; pass an offset to
+      // render into a card-local canvas's coordinate system.
+      const drawBoid = (
+        targetCtx: CanvasRenderingContext2D,
+        b: Boid,
+        n: (typeof next)[number],
+        offsetX: number,
+        offsetY: number,
+      ) => {
+        const size = 4 + n.alarm * 1.5
+        targetCtx.save()
+        targetCtx.translate(b.x - offsetX, b.y - offsetY)
+        targetCtx.rotate(b.angle)
+        if (n.orbiting > 0.15) {
+          targetCtx.shadowColor = `rgba(${n.orbitColor}, 0.95)`
+          targetCtx.shadowBlur = 8 + n.orbiting * 8
+          targetCtx.fillStyle = `rgba(${n.orbitColor}, ${0.55 + n.orbiting * 0.4})`
+        } else if (n.alarm > 0.05) {
+          targetCtx.fillStyle = fleeFill
+        } else if (n.shelterTint && n.shelterTintProx > 0.05) {
+          targetCtx.shadowColor = `rgba(${n.shelterTint}, 0.9)`
+          targetCtx.shadowBlur = 4 + n.shelterTintProx * 6
+          targetCtx.fillStyle = `rgba(${n.shelterTint}, ${0.6 + n.shelterTintProx * 0.35})`
+        } else {
+          targetCtx.fillStyle = fill
+        }
+        targetCtx.beginPath()
+        targetCtx.moveTo(size, 0)
+        targetCtx.lineTo(-size * 0.7, size * 0.55)
+        targetCtx.lineTo(-size * 0.4, 0)
+        targetCtx.lineTo(-size * 0.7, -size * 0.55)
+        targetCtx.closePath()
+        targetCtx.fill()
+        targetCtx.restore()
+      }
+
+      // 1) Background canvas, full viewport, behind everything. Boids inside
+      //    opaque cards are hidden by those cards' bg-card.
+      for (let i = 0; i < boids.length; i++) {
+        drawBoid(ctx, boids[i], next[i], 0, 0)
+      }
+
+      // 2) Per-card mirror canvases. Same simulation, but rendered INSIDE
+      //    each marked card's stacking context, so chips sitting at higher
+      //    z-index inside the card hide the boids passing behind them. This
+      //    is what makes boids visually "fly above the card": the card body
+      //    is below the local canvas, but card content is above it.
+      const mirrors = document.querySelectorAll<HTMLCanvasElement>('canvas[data-boid-mirror]')
+      mirrors.forEach((mc) => {
+        const r = mc.getBoundingClientRect()
+        if (r.bottom < 0 || r.top > h || r.right < 0 || r.left > w) return
+        const mctx = mc.getContext('2d')
+        if (!mctx) return
+        // Resize on demand (reflows, theme switches, etc.)
+        const cssW = Math.round(r.width)
+        const cssH = Math.round(r.height)
+        const targetW = cssW * dpr
+        const targetH = cssH * dpr
+        if (mc.width !== targetW || mc.height !== targetH) {
+          mc.width = targetW
+          mc.height = targetH
+          mctx.setTransform(1, 0, 0, 1, 0, 0)
+          mctx.scale(dpr, dpr)
+        }
+        mctx.clearRect(0, 0, cssW, cssH)
+        // Only draw boids whose screen position falls inside this card.
+        for (let i = 0; i < boids.length; i++) {
+          const b = boids[i]
+          if (b.x < r.left - 8 || b.x > r.right + 8 || b.y < r.top - 8 || b.y > r.bottom + 8) continue
+          drawBoid(mctx, b, next[i], r.left, r.top)
+        }
+      })
 
       raf = requestAnimationFrame(tick)
     }
 
     onResize()
+    seed()
     window.addEventListener('resize', onResize)
     window.addEventListener('mousemove', onMove)
     window.addEventListener('mouseleave', onLeave)

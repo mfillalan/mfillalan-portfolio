@@ -83,7 +83,7 @@ export default function Hero() {
           variants={item}
           className="mt-6 mx-auto max-w-2xl text-balance text-lg text-muted-foreground sm:text-xl"
         >
-          I'm <span className="text-foreground font-medium">Michael Fillalan</span> — a software
+          I'm <span className="text-foreground font-medium">Michael Fillalan</span>, a software
           engineer with 14 years of production experience, now fully committed to AI-native
           development. I build systems that work, and interfaces that feel good using them.
         </motion.p>

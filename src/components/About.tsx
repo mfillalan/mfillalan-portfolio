@@ -10,7 +10,7 @@ const principles = [
   {
     icon: Sparkles,
     title: 'Software that feels alive',
-    body: 'Good UIs feel less like forms and more like worlds — intuitive, responsive, fun to use.',
+    body: 'Good UIs feel less like forms and more like worlds. Intuitive, responsive, fun to use.',
   },
   {
     icon: Target,
@@ -31,7 +31,7 @@ export default function About() {
           className="max-w-2xl mb-16"
         >
           <p className="font-mono text-xs uppercase tracking-[0.2em] text-primary mb-4">
-            01 — About
+            01 / About
           </p>
           <h2 className="font-display text-4xl sm:text-5xl tracking-tight text-balance">
             Coding since I was 11. Still obsessed.
@@ -54,12 +54,12 @@ export default function About() {
             <p>
               My background is building and modernizing production systems, but what drives me is
               finding the creative angle inside technical problems. I gravitate toward
-              experiences that feel alive — I believe good software should have the same pull as
+              experiences that feel alive. I believe good software should have the same pull as
               a great game.
             </p>
             <p>
               <span className="text-foreground">I'm actively looking</span> to work on projects
-              that push boundaries — teams willing to think differently about what software can
+              that push boundaries, with teams willing to think differently about what software can
               be. I've gone deep on AI-native development over the past year and I'm eager to
               apply that alongside strong full-stack fundamentals wherever creative, motivated
               people are building something worth building.

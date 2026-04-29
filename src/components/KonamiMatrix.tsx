@@ -12,6 +12,10 @@ const MESSAGES = [
 
 const CHAR_SPEED = 55;
 const LINE_PAUSE = 700;
+// Wait for the CRT power-on animation (see .konami-overlay in index.css)
+// to settle before any characters are typed. Otherwise text appears while
+// the screen is still squished into a horizontal line.
+const POWER_ON_DELAY = 600;
 
 type ScatterStyle = { tx: number; ty: number; rot: number };
 
@@ -62,7 +66,7 @@ function playKnock() {
     knock(ctx.currentTime + 0.5);
     setTimeout(() => ctx.close(), 1400);
   } catch {
-    // AudioContext not available — silently skip
+    // AudioContext not available; silently skip.
   }
 }
 
@@ -91,7 +95,7 @@ export default function KonamiMatrix() {
   useEffect(() => { failingRef.current = failing; }, [failing]);
   useEffect(() => { activeRef.current = active; }, [active]);
 
-  // Single stable keydown listener — refs avoid stale closure issues
+  // Single stable keydown listener. Refs avoid stale closure issues.
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (activeRef.current) { dismiss(); return; }
@@ -111,7 +115,7 @@ export default function KonamiMatrix() {
           setProgress(next);
         }
       } else if (prog > 0) {
-        // Wrong key — scatter the HUD
+        // Wrong key. Scatter the HUD.
         failingRef.current = true;
         setFailing(true);
         const styles: ScatterStyle[] = SYMBOLS.map(() => ({
@@ -135,11 +139,28 @@ export default function KonamiMatrix() {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [dismiss]);
 
+  // External activation channel: components can dispatch a 'konami:activate'
+  // CustomEvent on window to open the matrix without going through the
+  // arrow-key sequence. Used by the long-press handler on the footer hint
+  // so mobile / touch devices have a way in.
+  useEffect(() => {
+    const onActivate = () => {
+      if (activeRef.current) return;
+      progressRef.current = 0;
+      setProgress(0);
+      setLines([]);
+      activeRef.current = true;
+      setActive(true);
+    };
+    window.addEventListener('konami:activate', onActivate);
+    return () => window.removeEventListener('konami:activate', onActivate);
+  }, []);
+
   // Typewriter effect when overlay opens
   useEffect(() => {
     if (!active) return;
 
-    let elapsed = 0;
+    let elapsed = POWER_ON_DELAY;
     MESSAGES.forEach((msg, lineIndex) => {
       for (let charIndex = 1; charIndex <= msg.length; charIndex++) {
         const chunk = msg.slice(0, charIndex);
@@ -177,7 +198,7 @@ export default function KonamiMatrix() {
 
   return (
     <>
-      {/* Progress HUD — only reveal after ↑↑ */}
+      {/* Progress HUD. Only reveal after ↑↑. */}
       {progress >= 2 && (
         <div className="konami-hud">
           {SYMBOLS.map((sym, i) => {
@@ -228,8 +249,8 @@ export default function KonamiMatrix() {
               );
             })}
             {allComplete && <span className="konami-cursor">█</span>}
-            <p className="konami-dismiss">[press any key or click to dismiss]</p>
           </div>
+          <p className="konami-dismiss">[press any key or click to dismiss]</p>
         </div>
       )}
     </>

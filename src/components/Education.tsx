@@ -31,7 +31,7 @@ export default function Education() {
           className="max-w-2xl mb-12"
         >
           <p className="font-mono text-xs uppercase tracking-[0.2em] text-primary mb-4">
-            05 — Background
+            05 / Background
           </p>
           <h2 className="font-display text-4xl sm:text-5xl tracking-tight">Background.</h2>
         </motion.div>

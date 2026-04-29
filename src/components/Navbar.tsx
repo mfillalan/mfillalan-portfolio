@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { motion, useScroll, useSpring } from 'framer-motion'
-import { Moon, Sun, FileText } from 'lucide-react'
+import { AnimatePresence, motion, useScroll, useSpring } from 'framer-motion'
+import { FileText, Menu as MenuIcon, Moon, Sun, X as CloseIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 
@@ -21,8 +21,9 @@ const sections = [
 
 export default function Navbar({ isResumeRoute, theme, onToggleTheme }: NavbarProps) {
   const [active, setActive] = useState('hero')
+  const [mobileOpen, setMobileOpen] = useState(false)
   const { scrollYProgress } = useScroll()
-  // Spring smooths the progress bar — direct scroll values are jittery.
+  // Spring smooths the progress bar. Direct scroll values are jittery.
   const progress = useSpring(scrollYProgress, { stiffness: 120, damping: 30, restDelta: 0.001 })
 
   useEffect(() => {
@@ -40,9 +41,14 @@ export default function Navbar({ isResumeRoute, theme, onToggleTheme }: NavbarPr
     return () => window.removeEventListener('scroll', onScroll)
   }, [isResumeRoute])
 
+  // Auto-close the mobile menu when navigating to the resume route
+  useEffect(() => {
+    if (isResumeRoute) setMobileOpen(false)
+  }, [isResumeRoute])
+
   return (
     <>
-      {/* Top scroll progress bar — Framer Motion's useScroll + useSpring */}
+      {/* Top scroll progress bar (Framer Motion useScroll + useSpring). */}
       <motion.div
         className="fixed top-0 left-0 right-0 h-[2px] origin-left bg-primary z-[60]"
         style={{ scaleX: progress }}
@@ -52,7 +58,7 @@ export default function Navbar({ isResumeRoute, theme, onToggleTheme }: NavbarPr
         <nav className="flex items-center justify-between gap-3 rounded-full border border-border bg-background/70 px-4 py-2 backdrop-blur-xl shadow-lg shadow-black/5">
           <a
             href="#/"
-            className="font-display text-base italic tracking-tight pl-2 pr-1 hover:text-primary transition-colors whitespace-nowrap"
+            className="font-sans text-sm font-semibold tracking-tight pl-2 pr-1 hover:text-primary transition-colors whitespace-nowrap"
           >
             Michael Fillalan
           </a>
@@ -95,14 +101,100 @@ export default function Navbar({ isResumeRoute, theme, onToggleTheme }: NavbarPr
             >
               {theme === 'dark' ? <Sun className="size-4" /> : <Moon className="size-4" />}
             </Button>
-            <Button asChild variant="outline" size="sm" className="rounded-full hidden sm:inline-flex">
+
+            {/* Desktop-only resume button. On mobile the resume link lives in the
+                drop-down sheet so we don't crowd the pill. */}
+            <Button asChild variant="outline" size="sm" className="rounded-full hidden md:inline-flex">
               <a href="#/resume">
                 <FileText className="size-3.5" />
                 Resume
               </a>
             </Button>
+
+            {/* Mobile hamburger. Hidden on the resume route since there's
+                nothing to navigate to from there. */}
+            {!isResumeRoute && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setMobileOpen((o) => !o)}
+                aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+                aria-expanded={mobileOpen}
+                className="md:hidden rounded-full"
+              >
+                <AnimatePresence mode="wait" initial={false}>
+                  {mobileOpen ? (
+                    <motion.span
+                      key="close"
+                      initial={{ rotate: -90, opacity: 0 }}
+                      animate={{ rotate: 0, opacity: 1 }}
+                      exit={{ rotate: 90, opacity: 0 }}
+                      transition={{ duration: 0.15 }}
+                      className="inline-flex"
+                    >
+                      <CloseIcon className="size-4" />
+                    </motion.span>
+                  ) : (
+                    <motion.span
+                      key="menu"
+                      initial={{ rotate: 90, opacity: 0 }}
+                      animate={{ rotate: 0, opacity: 1 }}
+                      exit={{ rotate: -90, opacity: 0 }}
+                      transition={{ duration: 0.15 }}
+                      className="inline-flex"
+                    >
+                      <MenuIcon className="size-4" />
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </Button>
+            )}
           </div>
         </nav>
+
+        {/* Mobile drop-down sheet. Sits below the pill, same blurred surface
+            so it reads as part of the navbar. Tapping any link closes it. */}
+        <AnimatePresence>
+          {mobileOpen && !isResumeRoute && (
+            <motion.div
+              initial={{ opacity: 0, y: -8, scale: 0.97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -8, scale: 0.97 }}
+              transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+              style={{ transformOrigin: 'top center' }}
+              className="md:hidden mt-2 overflow-hidden rounded-2xl border border-border bg-background/85 backdrop-blur-xl shadow-lg shadow-black/5"
+            >
+              <ul className="p-2">
+                {sections.map((s) => (
+                  <li key={s.id}>
+                    <a
+                      href={`#${s.id}`}
+                      onClick={() => setMobileOpen(false)}
+                      className={cn(
+                        'block px-4 py-2.5 rounded-xl text-sm transition-colors',
+                        active === s.id
+                          ? 'bg-primary text-primary-foreground'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-accent',
+                      )}
+                    >
+                      {s.label}
+                    </a>
+                  </li>
+                ))}
+                <li className="mt-1 border-t border-border pt-1">
+                  <a
+                    href="#/resume"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm text-foreground hover:bg-accent transition-colors"
+                  >
+                    <FileText className="size-3.5" />
+                    Resume
+                  </a>
+                </li>
+              </ul>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </header>
     </>
   )

@@ -28,8 +28,9 @@ const groups = [
   {
     icon: Wrench,
     category: 'UI & Tooling',
-    skills: ['shadcn/ui', 'Tailwind CSS', 'Framer Motion', 'Git', 'GitHub', 'REST', 'MVC'],
+    skills: ['shadcn/ui', 'Tailwind CSS', 'Framer Motion', 'VS Code', 'Git', 'GitHub', 'REST', 'MVC'],
     span: 'md:col-span-2',
+    aboveBoids: true,
   },
   {
     icon: Sparkles,
@@ -39,9 +40,13 @@ const groups = [
       'MCP (Model Context Protocol)',
       'LLM Integration',
       'Prompt Engineering',
+      'Claude Code',
+      'Codex',
+      'GitHub Copilot',
     ],
     span: 'md:col-span-3',
     accent: true,
+    aboveBoids: true,
   },
 ]
 
@@ -57,7 +62,7 @@ export default function Skills() {
           className="max-w-2xl mb-16"
         >
           <p className="font-mono text-xs uppercase tracking-[0.2em] text-primary mb-4">
-            03 — Toolkit
+            03 / Toolkit
           </p>
           <h2 className="font-display text-4xl sm:text-5xl tracking-tight text-balance">
             What I reach for.
@@ -84,22 +89,36 @@ export default function Skills() {
               }}
               whileHover={{ y: -4 }}
               transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-              className={`${g.span ?? ''} rounded-2xl border border-border bg-card p-6 ${
+              className={`${g.span ?? ''} relative overflow-hidden rounded-2xl border border-border bg-card p-6 ${
                 g.accent ? 'bg-gradient-to-br from-primary/10 via-card to-card border-primary/30' : ''
               }`}
             >
-              <div className="flex items-center gap-3 mb-4">
-                <div className="rounded-lg bg-primary/10 text-primary p-2">
-                  <g.icon className="size-4" />
+              {/* Per-card mirror canvas. Sits above the card body but below
+                  the chips/title (which use a relative z-10 wrapper). The
+                  global AmbientParticles tick draws into every canvas with
+                  [data-boid-mirror] each frame. */}
+              {g.aboveBoids && (
+                <canvas
+                  data-boid-mirror
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 size-full"
+                  style={{ zIndex: 1 }}
+                />
+              )}
+              <div className="relative" style={{ zIndex: 10 }}>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="rounded-lg bg-primary/10 text-primary p-2">
+                    <g.icon className="size-4" />
+                  </div>
+                  <h3 className="font-medium text-base">{g.category}</h3>
                 </div>
-                <h3 className="font-medium text-base">{g.category}</h3>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {g.skills.map((s) => (
-                  <Badge key={s} variant="secondary" className="font-normal">
-                    {s}
-                  </Badge>
-                ))}
+                <div className="flex flex-wrap gap-2">
+                  {g.skills.map((s) => (
+                    <Badge key={s} variant="secondary" className="font-normal">
+                      {s}
+                    </Badge>
+                  ))}
+                </div>
               </div>
             </motion.div>
           ))}
