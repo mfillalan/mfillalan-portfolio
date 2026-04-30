@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { boidShare } from '@/lib/boidShare'
 
 /**
  * Boids flocking field.
@@ -814,6 +815,11 @@ export default function AmbientParticles() {
 
     onResize()
     seed()
+    // Publish the live boids array so other systems (e.g. the seaweed
+    // physics in Hero) can read positions/velocities each frame without
+    // re-implementing the simulation. The array is mutated in place, so
+    // sharing the reference once is enough.
+    boidShare.current = boids
     window.addEventListener('resize', onResize)
     window.addEventListener('mousemove', onMove)
     window.addEventListener('mouseleave', onLeave)
