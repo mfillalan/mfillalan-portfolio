@@ -50,7 +50,11 @@ export default function Hero() {
         className="container mx-auto max-w-5xl px-6 text-center"
       >
         <motion.div variants={item} className="flex justify-center mb-6">
-          <div className="relative">
+          <div
+            className="relative"
+            data-boid-shelter
+            data-boid-shelter-color="180, 140, 255"
+          >
             <div className="absolute -inset-1 rounded-full bg-gradient-to-br from-primary via-fuchsia-500/60 to-cyan-500/60 blur-md opacity-70" />
             <img
               src="/mfillalan-portfolio/profile-photo.jpeg"
@@ -89,7 +93,7 @@ export default function Hero() {
         </motion.p>
 
         <motion.div variants={item} className="mt-10 flex items-center justify-center gap-3">
-          <Magnetic shelter>
+          <Magnetic shelter shelterTight shelterColor="180, 140, 255">
             <Button asChild size="lg" className="rounded-full">
               <a href="#projects">
                 <Sparkles className="size-4" />
@@ -97,7 +101,7 @@ export default function Hero() {
               </a>
             </Button>
           </Magnetic>
-          <Magnetic shelter>
+          <Magnetic shelter shelterTight shelterColor="200, 200, 220">
             <Button asChild variant="outline" size="lg" className="rounded-full">
               <a href="#contact">Get in touch</a>
             </Button>

@@ -14,6 +14,14 @@ interface MagneticProps {
    * approaches (the existing cursor-flee force handles dispersion).
    */
   shelter?: boolean
+  /**
+   * Pulls sheltered boids deep into the chip so only the front of the
+   * triangle pokes past the edge. Use for buttons where boids should
+   * "barely peek their heads out" instead of forming a halo around it.
+   */
+  shelterTight?: boolean
+  /** Optional "r, g, b" string applied to sheltered/nearby boids. */
+  shelterColor?: string
 }
 
 /**
@@ -33,6 +41,8 @@ export function Magnetic({
   range = 28,
   className,
   shelter = false,
+  shelterTight = false,
+  shelterColor,
 }: MagneticProps) {
   const ref = useRef<HTMLDivElement>(null)
   const x = useMotionValue(0)
@@ -62,6 +72,8 @@ export function Magnetic({
       <motion.div
         style={{ x: sx, y: sy, display: 'inline-block' }}
         {...(shelter ? { 'data-boid-shelter': '' } : {})}
+        {...(shelter && shelterTight ? { 'data-boid-shelter-tight': '' } : {})}
+        {...(shelter && shelterColor ? { 'data-boid-shelter-color': shelterColor } : {})}
       >
         {children}
       </motion.div>

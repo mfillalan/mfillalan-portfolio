@@ -8,6 +8,15 @@ import {
   Wrench,
 } from 'lucide-react'
 
+// Skill chips that act as boid shelters. The color (rgb string) is used to
+// tint sheltered boids so the eye is drawn to these "feature" technologies.
+const SHELTERED_SKILLS: Record<string, string> = {
+  'shadcn/ui': '230, 230, 240',
+  'VS Code': '70, 150, 240',
+  'AI-Native Development': '180, 140, 255',
+  'Claude Code': '230, 130, 75',
+}
+
 const groups = [
   {
     icon: Braces,
@@ -113,11 +122,21 @@ export default function Skills() {
                   <h3 className="font-medium text-base">{g.category}</h3>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {g.skills.map((s) => (
-                    <Badge key={s} variant="secondary" className="font-normal">
-                      {s}
-                    </Badge>
-                  ))}
+                  {g.skills.map((s) => {
+                    const color = SHELTERED_SKILLS[s]
+                    return (
+                      <Badge
+                        key={s}
+                        variant="secondary"
+                        className="font-normal"
+                        {...(color
+                          ? { 'data-boid-shelter': '', 'data-boid-shelter-color': color }
+                          : {})}
+                      >
+                        {s}
+                      </Badge>
+                    )
+                  })}
                 </div>
               </div>
             </motion.div>

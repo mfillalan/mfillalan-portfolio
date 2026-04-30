@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { ArrowLeft, Mail, MapPin, Printer } from 'lucide-react'
+import { ArrowLeft, Globe, Mail, MapPin, Printer } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { GithubIcon, LinkedinIcon } from './icons'
@@ -22,6 +22,15 @@ const skills = [
   'AI-Native Dev',
   'MCP Protocol',
   'GitHub / CI/CD',
+]
+
+const selectedProjects = [
+  {
+    name: 'DendriteMCP',
+    tagline:
+      'Rust memory daemon that gives coding agents durable, searchable context across sessions. SQLite + sqlite-vec for vector recall, a relationship graph with per-edge decay, and a tokio-scheduled subconscious that consolidates memories using a local Ollama model. Ships with an MCP stdio bridge and a React dashboard.',
+    stack: 'Rust · Tokio · Axum · SQLite · MCP · Ollama · React',
+  },
 ]
 
 const experience = [
@@ -75,7 +84,7 @@ const experience = [
 
 export default function ResumePage() {
   return (
-    <div className="min-h-screen bg-muted/40 pt-28 pb-16 px-4">
+    <div className="min-h-screen bg-muted/40 pt-28 pb-16 px-4 print:min-h-0 print:pt-0 print:pb-0 print:px-0">
       <div className="no-print mx-auto mb-6 max-w-[8.5in] flex items-center justify-between">
         <Button asChild variant="ghost" size="sm">
           <a href="#/">
@@ -91,7 +100,7 @@ export default function ResumePage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="mx-auto max-w-[8.5in] bg-white text-zinc-900 rounded-lg shadow-2xl p-12 print:shadow-none print:rounded-none print:p-10 print:max-w-none"
+        className="mx-auto max-w-[8.5in] bg-white text-zinc-900 rounded-lg shadow-2xl p-12 print:shadow-none print:rounded-none print:p-0 print:max-w-none print:overflow-hidden"
       >
         <header className="border-b border-zinc-200 pb-6 mb-8">
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
@@ -106,6 +115,16 @@ export default function ResumePage() {
               <ContactRow icon={Mail}>
                 <a href="mailto:mfillalan@gmail.com" className="hover:underline">
                   mfillalan@gmail.com
+                </a>
+              </ContactRow>
+              <ContactRow icon={Globe}>
+                <a
+                  href="https://mfillalan.github.io/mfillalan-portfolio/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="hover:underline"
+                >
+                  mfillalan.github.io/mfillalan-portfolio
                 </a>
               </ContactRow>
               <ContactRow icon={LinkedinIcon}>
@@ -135,11 +154,20 @@ export default function ResumePage() {
             things that feel as good as they function. I bring a creative, hands-on approach to
             every layer of the stack, from architecture decisions to the small UI details that
             make software genuinely enjoyable to use. Currently deep in AI-native development
-            and looking for teams solving interesting problems.
+            and looking for teams solving interesting problems. Project write-ups and screenshots at{' '}
+            <a
+              href="https://mfillalan.github.io/mfillalan-portfolio/"
+              target="_blank"
+              rel="noreferrer"
+              className="text-zinc-900 underline underline-offset-2 hover:text-zinc-700"
+            >
+              mfillalan.github.io/mfillalan-portfolio
+            </a>
+            .
           </p>
         </header>
 
-        <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-10 print:block">
           <aside className="space-y-8">
             <Section title="Highlights">
               <ul className="space-y-2 text-sm text-zinc-700">
@@ -177,11 +205,11 @@ export default function ResumePage() {
             </Section>
           </aside>
 
-          <div>
+          <div className="print:break-before-page space-y-8">
             <Section title="Professional Experience">
               <div className="space-y-6">
                 {experience.map((job) => (
-                  <div key={`${job.company}-${job.role}`}>
+                  <div key={`${job.company}-${job.role}`} className="print:break-inside-avoid">
                     <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1">
                       <h3 className="font-medium text-zinc-900">{job.role}</h3>
                       <span className="text-xs font-mono text-zinc-500">{job.period}</span>
@@ -195,6 +223,18 @@ export default function ResumePage() {
                         </li>
                       ))}
                     </ul>
+                  </div>
+                ))}
+              </div>
+            </Section>
+
+            <Section title="Selected Projects">
+              <div className="space-y-4">
+                {selectedProjects.map((p) => (
+                  <div key={p.name} className="print:break-inside-avoid">
+                    <h3 className="font-medium text-zinc-900">{p.name}</h3>
+                    <p className="text-sm text-zinc-700 leading-relaxed mt-1">{p.tagline}</p>
+                    <p className="text-xs font-mono text-zinc-500 mt-1.5">{p.stack}</p>
                   </div>
                 ))}
               </div>

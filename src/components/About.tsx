@@ -11,6 +11,9 @@ const principles = [
     icon: Sparkles,
     title: 'Software that feels alive',
     body: 'Good UIs feel less like forms and more like worlds. Intuitive, responsive, fun to use.',
+    aboveBoids: true,
+    iconShelter: true,
+    iconColor: '255, 200, 80',
   },
   {
     icon: Target,
@@ -75,11 +78,44 @@ export default function About() {
                 viewport={{ once: true, margin: '-100px' }}
                 transition={{ duration: 0.5, delay: 0.2 + i * 0.1 }}
                 whileHover={{ y: -2 }}
-                className="rounded-2xl border border-border bg-card p-5 hover:border-primary/40 transition-colors"
+                className="relative overflow-hidden rounded-2xl border border-border bg-card p-5 hover:border-primary/40 transition-colors"
               >
-                <div className="flex items-start gap-4">
-                  <div className="rounded-lg bg-primary/10 text-primary p-2 shrink-0">
-                    <p.icon className="size-4" />
+                {p.aboveBoids && (
+                  <canvas
+                    data-boid-mirror
+                    aria-hidden
+                    className="pointer-events-none absolute inset-0 size-full"
+                    style={{ zIndex: 1 }}
+                  />
+                )}
+                <div className="relative flex items-start gap-4" style={{ zIndex: 10 }}>
+                  <div
+                    className={
+                      p.iconShelter
+                        ? 'relative overflow-hidden rounded-lg text-primary p-2 shrink-0'
+                        : 'rounded-lg bg-primary/10 text-primary p-2 shrink-0'
+                    }
+                    {...(p.iconShelter
+                      ? {
+                          'data-boid-shelter': '',
+                          'data-boid-shelter-color': p.iconColor ?? '255, 200, 80',
+                          // Tuck boids just inside the box edge so the box
+                          // hides their bodies and only their heads peek past.
+                          'data-boid-shelter-rest': '-4',
+                          'data-boid-shelter-peek': '3',
+                        }
+                      : {})}
+                  >
+                    {p.iconShelter && (
+                      <>
+                        {/* Opaque mask so sheltered boids on the mirror canvas
+                            below are actually hidden by the box (the original
+                            bg-primary/10 alone is too transparent to occlude). */}
+                        <div className="absolute inset-0 bg-card" />
+                        <div className="absolute inset-0 bg-primary/10" />
+                      </>
+                    )}
+                    <p.icon className={p.iconShelter ? 'relative size-4' : 'size-4'} />
                   </div>
                   <div>
                     <h3 className="font-medium text-base mb-1">{p.title}</h3>

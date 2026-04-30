@@ -309,8 +309,25 @@
   70% { opacity: 1; }
 }
 
+/* Honor users who request reduced motion. Strips all animations,
+   transitions, and smooth scroll. Boid canvas is gated separately
+   in App.tsx so it doesn't even mount. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  html { scroll-behavior: auto !important; }
+}
+
 /* Print rules for resume */
+@page { margin: 0.6in; }
 @media print {
   .no-print { display: none !important; }
   body { background: white; color: black; }
+  /* Strip framer-motion's residual transforms — they can confuse the
+     print engine's page-break math and produce a phantom blank page. */
+  [style*="transform"] { transform: none !important; }
 }

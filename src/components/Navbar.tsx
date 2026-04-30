@@ -50,11 +50,11 @@ export default function Navbar({ isResumeRoute, theme, onToggleTheme }: NavbarPr
     <>
       {/* Top scroll progress bar (Framer Motion useScroll + useSpring). */}
       <motion.div
-        className="fixed top-0 left-0 right-0 h-[2px] origin-left bg-primary z-[60]"
+        className="no-print fixed top-0 left-0 right-0 h-[2px] origin-left bg-primary z-[60]"
         style={{ scaleX: progress }}
       />
 
-      <header className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[min(960px,calc(100%-1.5rem))]">
+      <header className="no-print fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[min(960px,calc(100%-1.5rem))]">
         <nav className="flex items-center justify-between gap-3 rounded-full border border-border bg-background/70 px-4 py-2 backdrop-blur-xl shadow-lg shadow-black/5">
           <a
             href="#/"

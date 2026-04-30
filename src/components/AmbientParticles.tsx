@@ -22,6 +22,14 @@ interface Boid {
   vy: number
   /** Smoothed heading. Avoids jittery flips when velocity is near zero. */
   angle: number
+  /** Element of the shelter this boid has claimed, or null when roaming. */
+  shelter: HTMLElement | null
+  /** Angle around the claimed shelter's center where this boid rests. */
+  shelterAngle: number
+  /** Sine phase for the in/out peek oscillation while sheltered. */
+  peekPhase: number
+  /** Frames during which a recently-dispersed boid won't re-shelter. */
+  cooldown: number
 }
 
 const COUNT = 135
@@ -40,11 +48,35 @@ const MIN_SPEED = 0.55
 // Optional [data-boid-shelter-color="r, g, b"] tints boids that get close,
 // so e.g. the shadcn chip glows white-gray and the Tailwind chip cyan.
 const SHELTER_REACH = 230
-const SHELTER_REST = 35
 const W_SHELTER = 0.7
-// Color tint kicks in only when very close (so the surrounding flock stays
-// neutral and the tint reads as recognition of the chip).
-const SHELTER_TINT_RADIUS = 95
+// Personality knobs: shelters host a small number of "tenant" boids that
+// peek out, hide when the cursor approaches, and burst out when clicked.
+const SHELTER_CAPACITY = 3
+// Default rest position is just outside the chip edge in the boid's assigned
+// direction. Per-element overrides via data-boid-shelter-rest (number, px).
+// Tight shelters (data-boid-shelter-tight) tuck the boid INTO the chip so
+// only the front of the triangle peeks past the edge.
+const SHELTER_REST_PAD = 4
+const SHELTER_REST_PAD_TIGHT = -3
+const SHELTER_PEEK_AMP = 5
+const SHELTER_PEEK_AMP_TIGHT = 2.5
+const SHELTER_PEEK_SPEED = 0.045
+// Cursor proximity that triggers occupants to retract behind the chip.
+const SHELTER_HIDE_DIST = 170
+// Spring drives sheltered boids toward their rest position; damping keeps
+// them from oscillating into orbit. K * 4 ≈ critical damping squared, so
+// D set near 2*sqrt(K) gives smooth settle with no overshoot. Tuned so
+// arrival from any incoming velocity reads as "swims in, peeks out."
+const SHELTER_SPRING_K = 0.05
+const SHELTER_SPRING_D = 0.45
+// Movement (px/frame) above which a shelter is considered "scrolling," so
+// occupants forcibly hide and re-emerge once motion stops. Anything below
+// is treated as static for peek purposes.
+const SHELTER_SCROLL_HIDE = 8
+// Outward speed on click-disperse, plus the frames a dispersed boid waits
+// before it can re-claim a shelter (so they actually scatter).
+const SHELTER_BURST_SPEED = 4.8
+const SHELTER_COOLDOWN = 130
 
 // Orbital shelters: [data-boid-orbit] pulls boids into a constantly-moving
 // ring around the element. Physics model: a radial spring keeps them on the
@@ -96,6 +128,10 @@ export default function AmbientParticles() {
           vx: Math.cos(angle) * speed,
           vy: Math.sin(angle) * speed,
           angle,
+          shelter: null,
+          shelterAngle: 0,
+          peekPhase: Math.random() * Math.PI * 2,
+          cooldown: 0,
         }
       })
     }
@@ -116,6 +152,25 @@ export default function AmbientParticles() {
     }
     const onLeave = () => {
       mouse.active = false
+    }
+
+    // Click-to-disperse: walk up from the click target to find a shelter.
+    // Set a flag the tick loop will consume to apply burst impulses to all
+    // current occupants. WeakMap so we don't pin removed elements in memory.
+    const shelterBurst = new WeakMap<HTMLElement, true>()
+    // Per-shelter previous-frame center, used to compute per-frame movement.
+    // Sheltered boids translate by this delta so they stay glued to the
+    // shelter through scroll, magnetic pull, and layout shifts.
+    const prevShelterPos = new WeakMap<HTMLElement, { x: number; y: number }>()
+    const onClick = (e: MouseEvent) => {
+      let el = e.target as HTMLElement | null
+      while (el && el !== document.body) {
+        if (el.matches?.('[data-boid-shelter]')) {
+          shelterBurst.set(el, true)
+          return
+        }
+        el = el.parentElement
+      }
     }
 
     const limit = (vx: number, vy: number, max: number) => {
@@ -148,16 +203,89 @@ export default function AmbientParticles() {
       // Snapshot active shelters this frame. Cheap for a handful of elements
       // and ensures positions track through scroll, magnetic pull, layout shifts.
       const shelterEls = document.querySelectorAll<HTMLElement>('[data-boid-shelter]')
-      const shelters: Array<{ x: number; y: number; color?: string }> = []
+      const shelters: Array<{
+        el: HTMLElement
+        x: number
+        y: number
+        rx: number
+        ry: number
+        dx: number
+        dy: number
+        pad: number
+        peekAmp: number
+        color?: string
+      }> = []
+      const shelterByEl = new Map<HTMLElement, (typeof shelters)[number]>()
       shelterEls.forEach((el) => {
         const r = el.getBoundingClientRect()
         if (r.bottom < 0 || r.top > h || r.right < 0 || r.left > w) return
-        shelters.push({
-          x: r.left + r.width / 2,
-          y: r.top + r.height / 2,
+        // data-boid-shelter-tight makes boids tuck deep into the chip and
+        // only peek their heads past the edge. Per-element pad/peek can
+        // also be set explicitly via data attrs for one-off tuning.
+        const tight = el.hasAttribute('data-boid-shelter-tight')
+        const padAttr = Number(el.dataset.boidShelterRest)
+        const ampAttr = Number(el.dataset.boidShelterPeek)
+        const pad = Number.isFinite(padAttr)
+          ? padAttr
+          : tight
+            ? SHELTER_REST_PAD_TIGHT
+            : SHELTER_REST_PAD
+        const peekAmp = Number.isFinite(ampAttr)
+          ? ampAttr
+          : tight
+            ? SHELTER_PEEK_AMP_TIGHT
+            : SHELTER_PEEK_AMP
+        const cx = r.left + r.width / 2
+        const cy = r.top + r.height / 2
+        const prev = prevShelterPos.get(el)
+        const dx = prev ? cx - prev.x : 0
+        const dy = prev ? cy - prev.y : 0
+        prevShelterPos.set(el, { x: cx, y: cy })
+        const s = {
+          el,
+          x: cx,
+          y: cy,
+          rx: r.width / 2,
+          ry: r.height / 2,
+          dx,
+          dy,
+          pad,
+          peekAmp,
           color: el.dataset.boidShelterColor,
-        })
+        }
+        shelters.push(s)
+        shelterByEl.set(el, s)
       })
+
+      // Consume click-disperse flags: any boid sheltered at a clicked element
+      // gets an outward impulse along its assigned angle and a recovery
+      // cooldown so it actually scatters instead of immediately reattaching.
+      shelterEls.forEach((el) => {
+        if (!shelterBurst.has(el)) return
+        for (const b of boids) {
+          if (b.shelter !== el) continue
+          const jitter = (Math.random() - 0.5) * 0.6
+          b.vx = Math.cos(b.shelterAngle) * (SHELTER_BURST_SPEED + jitter)
+          b.vy = Math.sin(b.shelterAngle) * (SHELTER_BURST_SPEED + jitter)
+          b.shelter = null
+          b.cooldown = SHELTER_COOLDOWN
+        }
+        shelterBurst.delete(el)
+      })
+
+      // Tally current occupants per shelter, used downstream to enforce
+      // capacity when roaming boids try to claim a slot. Also drop stale
+      // claims (shelter scrolled out of viewport or removed from DOM).
+      const occupantCount = new Map<HTMLElement, number>()
+      for (const b of boids) {
+        if (!b.shelter) continue
+        if (!shelterByEl.has(b.shelter)) {
+          b.shelter = null
+          b.cooldown = 30
+          continue
+        }
+        occupantCount.set(b.shelter, (occupantCount.get(b.shelter) ?? 0) + 1)
+      }
 
       // Each orbit element can specify its own color + radius via data attrs:
       //   data-boid-orbit-color="r, g, b"  (default green Konami palette)
@@ -181,9 +309,67 @@ export default function AmbientParticles() {
         orbitColor: string
         shelterTint?: string
         shelterTintProx: number
+        sheltered: boolean
       }> = []
       for (let i = 0; i < boids.length; i++) {
         const b = boids[i]
+
+        if (b.cooldown > 0) b.cooldown--
+
+        // ── SHELTERED PATH ─────────────────────────────────────────
+        // Tenants of a shelter ignore flocking & flee forces and instead
+        // sit on a per-boid rest position right at the chip's elliptical
+        // boundary in the boid's assigned direction. Peek oscillation
+        // bobs them in/out along that radius; cursor proximity retracts
+        // them inside the chip (where its bg covers them visually).
+        if (b.shelter) {
+          const s = shelterByEl.get(b.shelter)!
+          // Translate the boid by however much the shelter moved this frame
+          // (scroll, magnetic pull, layout shift). This keeps them perfectly
+          // glued instead of being chased by the spring with a visible lag.
+          b.x += s.dx
+          b.y += s.dy
+          // Cursor proximity → retract inward.
+          let hide = 0
+          if (mouse.active) {
+            const cd = Math.hypot(mouse.x - s.x, mouse.y - s.y)
+            if (cd < SHELTER_HIDE_DIST) hide = 1 - cd / SHELTER_HIDE_DIST
+          }
+          // Scroll/movement → also retract. Peek resumes once the shelter
+          // is still again, so boids hide while the user is actively
+          // scrolling and pop back out the moment scroll inertia stops.
+          const movement = Math.hypot(s.dx, s.dy)
+          if (movement > 0) {
+            hide = Math.max(hide, Math.min(1, movement / SHELTER_SCROLL_HIDE))
+          }
+          b.peekPhase += SHELTER_PEEK_SPEED
+          const peek = s.peekAmp * Math.sin(b.peekPhase)
+          // Ellipse boundary at the boid's angle: r(θ) = rx*ry / sqrt((ry cosθ)^2 + (rx sinθ)^2)
+          // This makes boids hug the chip outline tightly instead of orbiting on a
+          // circle whose radius is dominated by whichever axis is longer.
+          const cosA = Math.cos(b.shelterAngle)
+          const sinA = Math.sin(b.shelterAngle)
+          const denom = Math.sqrt((s.ry * cosA) ** 2 + (s.rx * sinA) ** 2) || 1
+          const ellipseR = (s.rx * s.ry) / denom
+          const visibleR = ellipseR + s.pad
+          const hiddenR = -Math.min(s.rx, s.ry) * 0.25
+          const radius = visibleR + peek + (hiddenR - visibleR - peek) * hide
+          const restX = s.x + radius * cosA
+          const restY = s.y + radius * sinA
+          const ax = (restX - b.x) * SHELTER_SPRING_K - b.vx * SHELTER_SPRING_D
+          const ay = (restY - b.y) * SHELTER_SPRING_K - b.vy * SHELTER_SPRING_D
+          next.push({
+            ax,
+            ay,
+            alarm: 0,
+            orbiting: 0,
+            orbitColor: '80, 255, 140',
+            shelterTint: s.color,
+            shelterTintProx: s.color ? 0.7 + (1 - hide) * 0.3 : 0,
+            sheltered: true,
+          })
+          continue
+        }
 
         // Orbital influence first; orbiting boids skip cohesion (otherwise
         // the ring collapses into a knot). Two forces:
@@ -295,42 +481,58 @@ export default function AmbientParticles() {
         }
 
         // Shelter attraction: soft pull toward the nearest in-viewport
-        // shelter. Beyond SHELTER_REACH there's no influence at all.
-        // Also tracks the nearest shelter's color so the boid can be tinted
-        // when it gets close to a labeled chip (shadcn/ui, Tailwind, etc.).
-        let shelterTint: string | undefined
-        let shelterTintProx = 0
-        if (shelters.length > 0) {
-          let nearestDx = 0
-          let nearestDy = 0
+        // shelter that still has an open slot. Once close enough, the boid
+        // claims a slot and switches to the sheltered path next frame.
+        // Boids on cooldown (just dispersed) skip this entirely.
+        if (shelters.length > 0 && b.cooldown === 0) {
+          let nearestS: (typeof shelters)[number] | null = null
           let nearestD = Infinity
-          let nearestColor: string | undefined
           for (const s of shelters) {
+            if ((occupantCount.get(s.el) ?? 0) >= SHELTER_CAPACITY) continue
             const dx = s.x - b.x
             const dy = s.y - b.y
             const d = Math.hypot(dx, dy)
             if (d < nearestD) {
               nearestD = d
-              nearestDx = dx
-              nearestDy = dy
-              nearestColor = s.color
+              nearestS = s
             }
           }
-          if (nearestD < SHELTER_REACH && nearestD > SHELTER_REST) {
-            const desiredX = (nearestDx / nearestD) * MAX_SPEED
-            const desiredY = (nearestDy / nearestD) * MAX_SPEED
-            const fx = desiredX - b.vx
-            const fy = desiredY - b.vy
-            const [lx, ly] = limit(fx, fy, MAX_FORCE)
-            const pull = 1 - nearestD / SHELTER_REACH
-            ax += lx * W_SHELTER * pull
-            ay += ly * W_SHELTER * pull
-          }
-          // Tint independently of pull, only when truly close to a colored
-          // shelter, so the rest of the flock stays neutral.
-          if (nearestColor && nearestD < SHELTER_TINT_RADIUS) {
-            shelterTint = nearestColor
-            shelterTintProx = 1 - nearestD / SHELTER_TINT_RADIUS
+          if (nearestS && nearestD < SHELTER_REACH) {
+            const dx = nearestS.x - b.x
+            const dy = nearestS.y - b.y
+            // Pull stays active all the way to the center so the boid
+            // genuinely swims into the chip rather than getting yanked by
+            // the spring at the rim. Pull falls off linearly so motion
+            // reads as a steady cruise, not an acceleration ramp.
+            if (nearestD > 4) {
+              const desiredX = (dx / nearestD) * MAX_SPEED
+              const desiredY = (dy / nearestD) * MAX_SPEED
+              const fx = desiredX - b.vx
+              const fy = desiredY - b.vy
+              const [lx, ly] = limit(fx, fy, MAX_FORCE)
+              const pull = 1 - nearestD / SHELTER_REACH
+              ax += lx * W_SHELTER * pull
+              ay += ly * W_SHELTER * pull
+            }
+            // Roaming boids stay neutral. Color is reserved for actual
+            // tenants of the shelter, so the tint cleanly signals "this
+            // boid has joined this thing" instead of leaking onto every
+            // boid that happens to drift through the proximity radius.
+            // Claim only after the boid has actually swum into the chip.
+            // The spring will then ease it out to its rest position with
+            // critical damping, so the transition reads as "swims into
+            // shelter, peeks out" rather than the previous teleport-to-rim.
+            if (nearestD < 14) {
+              const claimed = occupantCount.get(nearestS.el) ?? 0
+              if (claimed < SHELTER_CAPACITY) {
+                b.shelter = nearestS.el
+                b.peekPhase = Math.random() * Math.PI * 2
+                // Snap angle to the side the boid arrived from so it
+                // surfaces back where it came in.
+                b.shelterAngle = Math.atan2(b.y - nearestS.y, b.x - nearestS.x)
+                occupantCount.set(nearestS.el, claimed + 1)
+              }
+            }
           }
         }
 
@@ -353,7 +555,7 @@ export default function AmbientParticles() {
           }
         }
 
-        next.push({ ax, ay, alarm, orbiting, orbitColor, shelterTint, shelterTintProx })
+        next.push({ ax, ay, alarm, orbiting, orbitColor, shelterTint: undefined, shelterTintProx: 0, sheltered: false })
       }
 
       // Integrate physics + update headings (no drawing here so we can render
@@ -366,10 +568,10 @@ export default function AmbientParticles() {
         ;[b.vx, b.vy] = limit(b.vx, b.vy, MAX_SPEED)
 
         // Always-alive: enforce a minimum speed. Without this, boids that
-        // settle at shelters (or escape all forces near zero) just float in
-        // place looking dead. With this they always drift like real fish.
+        // escape all forces near zero just float in place looking dead.
+        // Sheltered boids opt out — their spring needs to settle to rest.
         const liveSpd = Math.hypot(b.vx, b.vy)
-        if (liveSpd < MIN_SPEED) {
+        if (!n.sheltered && liveSpd < MIN_SPEED) {
           if (liveSpd < 0.001) {
             const a = Math.random() * Math.PI * 2
             b.vx = Math.cos(a) * MIN_SPEED
@@ -384,7 +586,9 @@ export default function AmbientParticles() {
         b.x += b.vx
         b.y += b.vy
 
-        if (n.orbiting < 0.05) {
+        // Don't wrap sheltered boids — they're glued to a chip's local
+        // coordinate system and would teleport on edge cases.
+        if (!n.sheltered && n.orbiting < 0.05) {
           if (b.x < -10) b.x = w + 10
           else if (b.x > w + 10) b.x = -10
           if (b.y < -10) b.y = h + 10
@@ -392,15 +596,24 @@ export default function AmbientParticles() {
         }
 
         // Update heading with shortest-arc interpolation. Atan2 is unstable
-        // near zero velocity (tiny noise spins boids randomly), so only
-        // retarget when moving meaningfully.
-        const speed = Math.hypot(b.vx, b.vy)
-        if (speed > 0.18) {
-          const target = Math.atan2(b.vy, b.vx)
+        // near zero velocity, so only retarget when moving meaningfully.
+        // Sheltered boids face outward (away from chip) so peeking reads as
+        // "popping head out" instead of "drifting sideways past the chip."
+        if (n.sheltered) {
+          const target = boids[i].shelterAngle
           let diff = target - b.angle
           while (diff > Math.PI) diff -= Math.PI * 2
           while (diff < -Math.PI) diff += Math.PI * 2
-          b.angle += diff * 0.18
+          b.angle += diff * 0.15
+        } else {
+          const speed = Math.hypot(b.vx, b.vy)
+          if (speed > 0.18) {
+            const target = Math.atan2(b.vy, b.vx)
+            let diff = target - b.angle
+            while (diff > Math.PI) diff -= Math.PI * 2
+            while (diff < -Math.PI) diff += Math.PI * 2
+            b.angle += diff * 0.18
+          }
         }
       }
 
@@ -485,6 +698,7 @@ export default function AmbientParticles() {
     window.addEventListener('resize', onResize)
     window.addEventListener('mousemove', onMove)
     window.addEventListener('mouseleave', onLeave)
+    window.addEventListener('click', onClick)
     tick()
 
     return () => {
@@ -492,6 +706,7 @@ export default function AmbientParticles() {
       window.removeEventListener('resize', onResize)
       window.removeEventListener('mousemove', onMove)
       window.removeEventListener('mouseleave', onLeave)
+      window.removeEventListener('click', onClick)
     }
   }, [])
 
