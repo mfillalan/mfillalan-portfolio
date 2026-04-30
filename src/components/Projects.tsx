@@ -16,6 +16,8 @@ interface Project {
   repoUrl?: string
   liveUrl?: string
   accent: string
+  /** "r, g, b" tint applied to fish that shelter at the title card. */
+  shelterColor: string
   screenshots?: Screenshot[]
 }
 
@@ -34,6 +36,7 @@ const projects: Project[] = [
       "Turns AI-assisted coding from disposable chat into a continuous engineering workflow, with persistent context, decision traceability, and a body of reusable project knowledge that compounds over time.",
     tags: ['Rust', 'Tokio', 'Axum', 'SQLite', 'Vector Search', 'React', 'TypeScript', 'MCP', 'Ollama', 'Knowledge Graph'],
     accent: 'from-violet-500/30 via-fuchsia-500/15 to-transparent',
+    shelterColor: '200, 130, 240',
     screenshots: [
       {
         src: `${BASE}projects/dendritemcp/01-bridge.png`,
@@ -85,6 +88,7 @@ const projects: Project[] = [
       "Replaces the legacy stack entirely at cutover: restores hiring viability on a modern platform, clears the legacy security and integration tech-debt, and unlocks capabilities (offline operation, real-time status, modern auth) that weren't realistically deliverable on the old stack.",
     tags: ['.NET 8', 'C#', 'ASP.NET Core', 'EF Core', 'React 19', 'TypeScript', 'MSSQL', 'Dapper', 'Vite', 'PWA', 'SignalR'],
     accent: 'from-cyan-500/30 via-blue-500/15 to-transparent',
+    shelterColor: '90, 180, 230',
     screenshots: [
       {
         src: `${BASE}projects/wild2/01-dashboard.png`,
@@ -142,7 +146,6 @@ export default function Projects() {
               // layoutId: when this element shares an id with another animating
               // element (the dialog below), Framer Motion morphs between them.
               layoutId={`project-${p.title}`}
-              data-boid-shelter
               onClick={() => setSelected(p)}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -155,10 +158,30 @@ export default function Projects() {
               <div
                 className={`absolute -top-24 -right-24 w-64 h-64 rounded-full bg-gradient-to-br ${p.accent} blur-3xl opacity-60 pointer-events-none`}
               />
-              <div className="relative">
-                <h3 className="font-display text-3xl tracking-tight mb-3">
-                  {p.title}
-                </h3>
+              {/* Mirror canvas so wandering fish are visible inside the
+                  project card (without it, the card's bg-card occludes them
+                  on the global background canvas). */}
+              <canvas
+                data-boid-mirror
+                aria-hidden
+                className="pointer-events-none absolute inset-0 size-full"
+                style={{ zIndex: 1 }}
+              />
+              <div className="relative" style={{ zIndex: 10 }}>
+                {/* Title "paper" — the actual shelter. Inline-block so it
+                    hugs the title text and reads as a small floating card
+                    that the fish hide behind. */}
+                <div className="mb-4">
+                  <div
+                    className="inline-block rounded-lg bg-card border border-border px-4 py-1.5 shadow-lg shadow-black/20"
+                    data-boid-shelter
+                    data-boid-shelter-color={p.shelterColor}
+                  >
+                    <h3 className="font-display text-3xl tracking-tight">
+                      {p.title}
+                    </h3>
+                  </div>
+                </div>
                 <p className="text-muted-foreground leading-relaxed mb-6">{p.summary}</p>
                 <div className="flex flex-wrap gap-2 mb-6">
                   {p.tags.slice(0, 5).map((t) => (

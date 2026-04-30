@@ -11,7 +11,7 @@ import {
 // Skill chips that act as boid shelters. The color (rgb string) is used to
 // tint sheltered boids so the eye is drawn to these "feature" technologies.
 const SHELTERED_SKILLS: Record<string, string> = {
-  'shadcn/ui': '230, 230, 240',
+  'shadcn/ui': '150, 180, 220',
   'VS Code': '70, 150, 240',
   'AI-Native Development': '180, 140, 255',
   'Claude Code': '230, 130, 75',

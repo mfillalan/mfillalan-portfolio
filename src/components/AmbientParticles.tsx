@@ -30,6 +30,17 @@ interface Boid {
   peekPhase: number
   /** Frames during which a recently-dispersed boid won't re-shelter. */
   cooldown: number
+  /** Wander direction around the shelter while feeling brave. */
+  wanderAngle: number
+  /** Wander distance from shelter center, drifts with the angle. */
+  wanderRadius: number
+  /** Sustained orbit speed around the shelter (rad/frame), signed. Drifts
+   *  slowly and occasionally reverses, so wander reads as committed swim
+   *  direction instead of random twitching. */
+  wanderTurnRate: number
+  /** Element this boid is committed to orbit, or null. Capped per element so
+   *  the Konami easter egg doesn't suck in the entire flock. */
+  orbit: HTMLElement | null
 }
 
 const COUNT = 135
@@ -61,8 +72,29 @@ const SHELTER_REST_PAD_TIGHT = -3
 const SHELTER_PEEK_AMP = 5
 const SHELTER_PEEK_AMP_TIGHT = 2.5
 const SHELTER_PEEK_SPEED = 0.045
-// Cursor proximity that triggers occupants to retract behind the chip.
+// Cursor distance below which sheltered boids fully retract behind the chip.
 const SHELTER_HIDE_DIST = 170
+// Cursor distance above which sheltered boids feel safe enough to leave the
+// chip and wander calmly nearby. Between HIDE and SAFE they lerp smoothly,
+// so the boid's "bravery" reads as a continuous reaction to your cursor.
+const SHELTER_SAFE_DIST = 360
+// Wander orbit bounds — the boid's casual exploration stays within this
+// ring around the shelter while brave. Min is just past the visible peek
+// position; max is far enough that boids look like they're truly out and
+// about, not just hovering at the rim.
+const SHELTER_WANDER_MIN = 35
+const SHELTER_WANDER_MAX = 95
+// Sustained orbit speed range (rad/frame). The boid's wanderTurnRate is
+// initialized in this band with a random sign so each fish picks its own
+// pace and direction, then drifts slowly. Calm = small numbers.
+const SHELTER_WANDER_RATE_MIN = 0.005
+const SHELTER_WANDER_RATE_MAX = 0.018
+// Per-frame drift of the orbit rate. Small enough to feel committed.
+const SHELTER_WANDER_RATE_DRIFT = 0.0005
+// Probability per frame of reversing direction. ~once every 6 seconds.
+const SHELTER_WANDER_REVERSE = 0.0028
+// Per-frame drift of the orbit radius. Small so fish hold their distance.
+const SHELTER_WANDER_RADIUS_DRIFT = 0.18
 // Spring drives sheltered boids toward their rest position; damping keeps
 // them from oscillating into orbit. K * 4 ≈ critical damping squared, so
 // D set near 2*sqrt(K) gives smooth settle with no overshoot. Tuned so
@@ -88,6 +120,9 @@ const ORBIT_REACH = 220
 const ORBIT_RADIUS = 62
 const ORBIT_RADIAL_K = 0.025
 const ORBIT_TANGENT_K = 0.09
+// Cap on how many boids a single orbit element can hold. Anything beyond
+// this just swims past instead of getting recruited into the ring.
+const ORBIT_CAPACITY = 15
 
 // Behavior weights (tuning knobs).
 const W_SEPARATION = 1.4
@@ -132,6 +167,10 @@ export default function AmbientParticles() {
           shelterAngle: 0,
           peekPhase: Math.random() * Math.PI * 2,
           cooldown: 0,
+          wanderAngle: 0,
+          wanderRadius: 0,
+          wanderTurnRate: 0,
+          orbit: null,
         }
       })
     }
@@ -291,14 +330,29 @@ export default function AmbientParticles() {
       //   data-boid-orbit-color="r, g, b"  (default green Konami palette)
       //   data-boid-orbit-radius="78"      (default ORBIT_RADIUS)
       const orbitEls = document.querySelectorAll<HTMLElement>('[data-boid-orbit]')
-      const orbits: Array<{ x: number; y: number; radius: number; color: string }> = []
+      const orbits: Array<{ el: HTMLElement; x: number; y: number; radius: number; color: string }> = []
+      const orbitByEl = new Map<HTMLElement, (typeof orbits)[number]>()
       orbitEls.forEach((el) => {
         const r = el.getBoundingClientRect()
         if (r.bottom < 0 || r.top > h || r.right < 0 || r.left > w) return
         const color = el.dataset.boidOrbitColor ?? '80, 255, 140'
         const radius = Number(el.dataset.boidOrbitRadius) || ORBIT_RADIUS
-        orbits.push({ x: r.left + r.width / 2, y: r.top + r.height / 2, radius, color })
+        const o = { el, x: r.left + r.width / 2, y: r.top + r.height / 2, radius, color }
+        orbits.push(o)
+        orbitByEl.set(el, o)
       })
+
+      // Tally orbit occupants and drop stale claims (element scrolled out
+      // of viewport). Used downstream to enforce ORBIT_CAPACITY.
+      const orbitOccupantCount = new Map<HTMLElement, number>()
+      for (const b of boids) {
+        if (!b.orbit) continue
+        if (!orbitByEl.has(b.orbit)) {
+          b.orbit = null
+          continue
+        }
+        orbitOccupantCount.set(b.orbit, (orbitOccupantCount.get(b.orbit) ?? 0) + 1)
+      }
 
       // Compute new accelerations from neighbor interactions
       const next: Array<{
@@ -317,11 +371,13 @@ export default function AmbientParticles() {
         if (b.cooldown > 0) b.cooldown--
 
         // ── SHELTERED PATH ─────────────────────────────────────────
-        // Tenants of a shelter ignore flocking & flee forces and instead
-        // sit on a per-boid rest position right at the chip's elliptical
-        // boundary in the boid's assigned direction. Peek oscillation
-        // bobs them in/out along that radius; cursor proximity retracts
-        // them inside the chip (where its bg covers them visually).
+        // Tenants ignore flocking & flee forces and instead lerp between
+        // two targets based on how brave they feel:
+        //   bravery 0 → hide just inside the chip, only heads peek out
+        //   bravery 1 → wander calmly around the shelter on a slow random walk
+        // Bravery is driven by cursor distance, with scroll/layout movement
+        // forcing them back into hiding. Spring pulls the boid toward the
+        // lerped target; critical damping settles motion smoothly.
         if (b.shelter) {
           const s = shelterByEl.get(b.shelter)!
           // Translate the boid by however much the shelter moved this frame
@@ -329,35 +385,59 @@ export default function AmbientParticles() {
           // glued instead of being chased by the spring with a visible lag.
           b.x += s.dx
           b.y += s.dy
-          // Cursor proximity → retract inward.
-          let hide = 0
-          if (mouse.active) {
-            const cd = Math.hypot(mouse.x - s.x, mouse.y - s.y)
-            if (cd < SHELTER_HIDE_DIST) hide = 1 - cd / SHELTER_HIDE_DIST
-          }
-          // Scroll/movement → also retract. Peek resumes once the shelter
-          // is still again, so boids hide while the user is actively
-          // scrolling and pop back out the moment scroll inertia stops.
+
+          // Cursor → bravery. No cursor on page = full bravery.
+          const cursorDist = mouse.active
+            ? Math.hypot(mouse.x - s.x, mouse.y - s.y)
+            : Infinity
+          let bravery = Math.max(
+            0,
+            Math.min(1, (cursorDist - SHELTER_HIDE_DIST) / (SHELTER_SAFE_DIST - SHELTER_HIDE_DIST)),
+          )
+          // Scroll/movement → tuck back in. Bravery drops proportionally
+          // to how fast the shelter is being moved this frame.
           const movement = Math.hypot(s.dx, s.dy)
           if (movement > 0) {
-            hide = Math.max(hide, Math.min(1, movement / SHELTER_SCROLL_HIDE))
+            bravery = Math.min(bravery, 1 - Math.min(1, movement / SHELTER_SCROLL_HIDE))
           }
+
+          // Hide target: just inside the chip's elliptical boundary in the
+          // boid's assigned direction, with peek oscillation so heads bob.
+          // Ellipse boundary: r(θ) = rx*ry / √((ry cosθ)² + (rx sinθ)²)
           b.peekPhase += SHELTER_PEEK_SPEED
           const peek = s.peekAmp * Math.sin(b.peekPhase)
-          // Ellipse boundary at the boid's angle: r(θ) = rx*ry / sqrt((ry cosθ)^2 + (rx sinθ)^2)
-          // This makes boids hug the chip outline tightly instead of orbiting on a
-          // circle whose radius is dominated by whichever axis is longer.
           const cosA = Math.cos(b.shelterAngle)
           const sinA = Math.sin(b.shelterAngle)
           const denom = Math.sqrt((s.ry * cosA) ** 2 + (s.rx * sinA) ** 2) || 1
           const ellipseR = (s.rx * s.ry) / denom
-          const visibleR = ellipseR + s.pad
-          const hiddenR = -Math.min(s.rx, s.ry) * 0.25
-          const radius = visibleR + peek + (hiddenR - visibleR - peek) * hide
-          const restX = s.x + radius * cosA
-          const restY = s.y + radius * sinA
-          const ax = (restX - b.x) * SHELTER_SPRING_K - b.vx * SHELTER_SPRING_D
-          const ay = (restY - b.y) * SHELTER_SPRING_K - b.vy * SHELTER_SPRING_D
+          const hideR = ellipseR + s.pad + peek
+          const hideX = s.x + hideR * cosA
+          const hideY = s.y + hideR * sinA
+
+          // Wander target: each fish has a sustained orbit speed that drifts
+          // slowly and very rarely reverses, so the spring tracks a continuous
+          // arc around the shelter — calm directional swimming, not jitter.
+          if (bravery > 0.05) {
+            b.wanderTurnRate += (Math.random() - 0.5) * SHELTER_WANDER_RATE_DRIFT
+            if (Math.random() < SHELTER_WANDER_REVERSE) b.wanderTurnRate *= -1
+            // Keep speed within calm range, preserving sign.
+            const sign = b.wanderTurnRate < 0 ? -1 : 1
+            const mag = Math.abs(b.wanderTurnRate)
+            const clampedMag = Math.max(SHELTER_WANDER_RATE_MIN, Math.min(SHELTER_WANDER_RATE_MAX, mag))
+            b.wanderTurnRate = sign * clampedMag
+            b.wanderAngle += b.wanderTurnRate
+            b.wanderRadius += (Math.random() - 0.5) * SHELTER_WANDER_RADIUS_DRIFT
+            if (b.wanderRadius < SHELTER_WANDER_MIN) b.wanderRadius = SHELTER_WANDER_MIN
+            else if (b.wanderRadius > SHELTER_WANDER_MAX) b.wanderRadius = SHELTER_WANDER_MAX
+          }
+          const wanderX = s.x + b.wanderRadius * Math.cos(b.wanderAngle)
+          const wanderY = s.y + b.wanderRadius * Math.sin(b.wanderAngle)
+
+          // Lerp targets by bravery.
+          const targetX = hideX + (wanderX - hideX) * bravery
+          const targetY = hideY + (wanderY - hideY) * bravery
+          const ax = (targetX - b.x) * SHELTER_SPRING_K - b.vx * SHELTER_SPRING_D
+          const ay = (targetY - b.y) * SHELTER_SPRING_K - b.vy * SHELTER_SPRING_D
           next.push({
             ax,
             ay,
@@ -365,7 +445,9 @@ export default function AmbientParticles() {
             orbiting: 0,
             orbitColor: '80, 255, 140',
             shelterTint: s.color,
-            shelterTintProx: s.color ? 0.7 + (1 - hide) * 0.3 : 0,
+            // Glow strongest while hiding (focal eye-catcher), softer
+            // while wandering (subtle hint of belonging).
+            shelterTintProx: s.color ? 0.6 + (1 - bravery) * 0.4 : 0,
             sheltered: true,
           })
           continue
@@ -380,24 +462,42 @@ export default function AmbientParticles() {
         let orbitColor = '80, 255, 140'
         let orbitAx = 0
         let orbitAy = 0
-        if (orbits.length > 0) {
-          let oCx = 0, oCy = 0, oD = Infinity, oR = ORBIT_RADIUS, oColor = orbitColor
+        // Pick which orbit element this boid uses this frame:
+        //   - if already committed, stick to that one
+        //   - otherwise look for the nearest in-range orbit with a free slot
+        let activeOrbit: (typeof orbits)[number] | null = null
+        if (b.orbit) {
+          activeOrbit = orbitByEl.get(b.orbit) ?? null
+        } else if (orbits.length > 0) {
+          let bestD = Infinity
           for (const o of orbits) {
+            if ((orbitOccupantCount.get(o.el) ?? 0) >= ORBIT_CAPACITY) continue
             const dx = o.x - b.x
             const dy = o.y - b.y
             const d = Math.hypot(dx, dy)
-            if (d < oD) {
-              oD = d
-              oCx = o.x
-              oCy = o.y
-              oR = o.radius
-              oColor = o.color
+            if (d < bestD && d < ORBIT_REACH) {
+              bestD = d
+              activeOrbit = o
             }
           }
+          if (activeOrbit) {
+            // Claim the slot so subsequent boids see updated capacity.
+            b.orbit = activeOrbit.el
+            orbitOccupantCount.set(
+              activeOrbit.el,
+              (orbitOccupantCount.get(activeOrbit.el) ?? 0) + 1,
+            )
+          }
+        }
+        if (activeOrbit) {
+          const dx = activeOrbit.x - b.x
+          const dy = activeOrbit.y - b.y
+          const oD = Math.hypot(dx, dy)
           if (oD < ORBIT_REACH && oD > 0.5) {
+            const oR = activeOrbit.radius
             // Unit vector from boid → orbit center
-            const rdx = (oCx - b.x) / oD
-            const rdy = (oCy - b.y) / oD
+            const rdx = dx / oD
+            const rdy = dy / oD
             // Tangent (counterclockwise) is radial rotated 90° CCW
             const tdx = -rdy
             const tdy = rdx
@@ -413,7 +513,7 @@ export default function AmbientParticles() {
             orbitAx += tdx * tangentDelta * ORBIT_TANGENT_K
             orbitAy += tdy * tangentDelta * ORBIT_TANGENT_K
             orbiting = Math.max(0, 1 - oD / ORBIT_REACH)
-            orbitColor = oColor
+            orbitColor = activeOrbit.color
           }
         }
 
@@ -530,6 +630,15 @@ export default function AmbientParticles() {
                 // Snap angle to the side the boid arrived from so it
                 // surfaces back where it came in.
                 b.shelterAngle = Math.atan2(b.y - nearestS.y, b.x - nearestS.x)
+                // Seed wander state from where the boid claimed, so its
+                // first brave drift starts from the natural exit angle
+                // rather than teleporting to a random orbit slot.
+                b.wanderAngle = b.shelterAngle
+                b.wanderRadius = SHELTER_WANDER_MIN + Math.random() * (SHELTER_WANDER_MAX - SHELTER_WANDER_MIN)
+                // Random orbit direction + speed → per-fish personality.
+                b.wanderTurnRate =
+                  (Math.random() < 0.5 ? -1 : 1) *
+                  (SHELTER_WANDER_RATE_MIN + Math.random() * (SHELTER_WANDER_RATE_MAX - SHELTER_WANDER_RATE_MIN))
                 occupantCount.set(nearestS.el, claimed + 1)
               }
             }
@@ -600,7 +709,11 @@ export default function AmbientParticles() {
         // Sheltered boids face outward (away from chip) so peeking reads as
         // "popping head out" instead of "drifting sideways past the chip."
         if (n.sheltered) {
-          const target = boids[i].shelterAngle
+          // While moving (wandering or transitioning) face the actual motion
+          // direction; while stationary at a hide position face outward from
+          // the shelter so the head reads as "peeking" rather than drifting.
+          const speed = Math.hypot(b.vx, b.vy)
+          const target = speed > 0.35 ? Math.atan2(b.vy, b.vx) : boids[i].shelterAngle
           let diff = target - b.angle
           while (diff > Math.PI) diff -= Math.PI * 2
           while (diff < -Math.PI) diff += Math.PI * 2
@@ -643,11 +756,17 @@ export default function AmbientParticles() {
         } else {
           targetCtx.fillStyle = fill
         }
+        // Fish silhouette: rounded teardrop body with a forked tail. One
+        // continuous path, single fill. Oriented along +x axis (head at
+        // +x, tail at -x), then rotated to match heading.
         targetCtx.beginPath()
-        targetCtx.moveTo(size, 0)
-        targetCtx.lineTo(-size * 0.7, size * 0.55)
-        targetCtx.lineTo(-size * 0.4, 0)
-        targetCtx.lineTo(-size * 0.7, -size * 0.55)
+        targetCtx.moveTo(size * 1.0, 0) // nose
+        targetCtx.quadraticCurveTo(size * 0.5, size * 0.4, -size * 0.4, size * 0.28) // top body
+        targetCtx.lineTo(-size * 1.15, size * 0.55) // upper tail tip
+        targetCtx.lineTo(-size * 0.75, 0) // tail notch
+        targetCtx.lineTo(-size * 1.15, -size * 0.55) // lower tail tip
+        targetCtx.lineTo(-size * 0.4, -size * 0.28) // bottom body
+        targetCtx.quadraticCurveTo(size * 0.5, -size * 0.4, size * 1.0, 0) // back to nose
         targetCtx.closePath()
         targetCtx.fill()
         targetCtx.restore()
