@@ -25,6 +25,36 @@ const BASE = import.meta.env.BASE_URL
 
 const projects: Project[] = [
   {
+    title: 'Dendrite Wiki',
+    summary:
+      'A local-first MCP server that gives AI coding agents a living `docs/wiki/` markdown knowledge base, project memory, and lightweight rituals — installed into any agent client with a single `npx -y dendrite-wiki`. Released on npm and supports Claude Code, Codex, Cursor, Copilot, Continue, Grok, Windsurf, and Antigravity out of the box.',
+    role:
+      'Creator and sole engineer. I own the entire surface: the TypeScript MCP server, the TUI installer that targets nine agent clients (including Windows-specific quirks like `npx.cmd` and `HOME` handling), the capsule token-efficiency profile, the tree-sitter API-doc generators for sixteen languages, the local benchmark harness, and the opt-in telemetry contract.',
+    details:
+      "DendriteMCP proved the idea — durable project context for AI agents — but its Rust core, local LLM, and embedded dashboard are too heavy for someone who just wants their coding agent to stop forgetting. Dendrite Wiki repackages the same idea as a single npm install: no daemon to run, no Ollama dependency, no separate data store. The agent's memory becomes a normal `docs/wiki/` directory of markdown files that VitePress can render and humans can read, edit, and version-control like any other source.\n\nThe install path is intentionally one command: `npx -y dendrite-wiki` opens a TUI installer that detects the project, picks the right agent client target, writes the MCP config in the right place, and seeds starter wiki pages plus agent guidance hooks. Supported targets include Claude Code, Codex, Cursor, GitHub Copilot in VS Code, Continue, Grok Build CLI, Windsurf, Antigravity, and a workspace-local `all` profile.\n\nThe MCP surface is built around a 'capsule' profile that ships only three tools by default — `dendrite_prepare`, `dendrite_read`, and `dendrite_execute` — which cuts startup overhead from roughly 5,300 tokens for the full 45-tool catalog to about 540, and trims a representative workflow result from ~29k tokens to ~16k. The full tool catalog is still available behind compact execution when an agent actually needs it. The kind of micro-optimization that compounds across hundreds of agent calls per day.\n\nBeyond storage, the server runs lightweight rituals that nudge the agent into good habits: brief itself on the relevant wiki pages before working, record durable lessons as it learns them, surface stale pages and drift findings on a maintenance board, and leave handoff notes when work is unfinished. A separate tree-sitter-backed generator produces API documentation pages directly into the wiki for TypeScript, Python, Rust, Go, Java, Ruby, C/C++, PHP, C#, Swift, Lua, Scala, Elixir, OCaml, Kotlin, and Bash.\n\nEverything stays local by default. No account, no upload, no telemetry unless the user opts in — and the opt-in path only ships sanitized aggregate counters with a local audit trail. The 'uninstall test' is deliberate: remove Dendrite tomorrow and `docs/wiki/` is still a working markdown knowledge base.",
+    impact:
+      "Brings the persistent-context idea from DendriteMCP into a form anyone can adopt in one command. Published on npm as `dendrite-wiki`, runs against nine agent clients out of the box, and ships token-efficiency wins that materially reduce per-session cost on every agent call.",
+    tags: ['TypeScript', 'MCP', 'Node.js', 'npm', 'VitePress', 'Markdown', 'Tree-sitter', 'Local-First', 'CLI'],
+    repoUrl: 'https://github.com/mfillalan/dendrite-wiki-mcp',
+    liveUrl: 'https://www.npmjs.com/package/dendrite-wiki',
+    accent: 'from-emerald-500/30 via-teal-500/15 to-transparent',
+    shelterColor: '90, 210, 170',
+    screenshots: [
+      {
+        src: `${BASE}projects/dendrite-wiki/01-wiki-page.png`,
+        caption: 'Wiki page: backlinks, source-backed claims, lifecycle metadata, generated table of contents.',
+      },
+      {
+        src: `${BASE}projects/dendrite-wiki/02-review-board.png`,
+        caption: 'Review board: stale pages, promotion candidates, memory hygiene, drift findings.',
+      },
+      {
+        src: `${BASE}projects/dendrite-wiki/03-item-detail.png`,
+        caption: 'Item detail: a memory entry with reasons and source-backed claims.',
+      },
+    ],
+  },
+  {
     title: 'DendriteMCP',
     summary:
       'A Rust memory daemon that gives coding agents durable, searchable context across sessions. Built on SQLite with vector search and a graph relationship layer, plus a background scheduler that autonomously consolidates, prunes, and reconciles memories using a local LLM.',

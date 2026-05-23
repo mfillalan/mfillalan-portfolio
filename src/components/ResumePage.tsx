@@ -26,6 +26,12 @@ const skills = [
 
 const selectedProjects = [
   {
+    name: 'Dendrite Wiki',
+    tagline:
+      'Local-first MCP server published on npm that gives AI coding agents a living docs/wiki markdown knowledge base, project memory, and lightweight rituals. One-command install (npx -y dendrite-wiki) targets nine agent clients including Claude Code, Codex, Cursor, and Copilot. Capsule profile cuts MCP startup overhead from ~5,300 to ~540 tokens.',
+    stack: 'TypeScript · MCP · Node.js · VitePress · Tree-sitter · npm',
+  },
+  {
     name: 'DendriteMCP',
     tagline:
       'Rust memory daemon that gives coding agents durable, searchable context across sessions. SQLite + sqlite-vec for vector recall, a relationship graph with per-edge decay, and a tokio-scheduled subconscious that consolidates memories using a local Ollama model. Ships with an MCP stdio bridge and a React dashboard.',
