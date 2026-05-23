@@ -1,0 +1,40 @@
+name: Deploy to mfillalan.github.io
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: usersite
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build (root base path)
+        env:
+          VITE_BASE: /
+        run: npm run build
+
+      - name: Publish to mfillalan/mfillalan.github.io
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          deploy_key: ${{ secrets.USERSITE_DEPLOY_KEY }}
+          external_repository: mfillalan/mfillalan.github.io
+          publish_branch: main
+          publish_dir: ./dist
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
+          commit_message: 'deploy: ${{ github.sha }} from mfillalan-portfolio'
