@@ -44,7 +44,7 @@ interface Boid {
   orbit: HTMLElement | null
 }
 
-const COUNT = 135
+const COUNT = 80
 const PERCEIVE = 55
 const SEPARATE = 22
 const FLEE_RADIUS = 130
