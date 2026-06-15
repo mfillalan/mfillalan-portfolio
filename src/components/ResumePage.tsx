@@ -5,9 +5,9 @@ import { Button } from '@/components/ui/button'
 import { GithubIcon, LinkedinIcon } from './icons'
 
 const highlights = [
-  '14 years of professional software engineering experience',
-  'Led WILD 2.0 modernization from legacy Web Forms to React + TypeScript + ASP.NET Core',
-  'AI-native engineering workflow with durable memory, MCP, and agent tooling',
+  '14 years of professional software engineering',
+  'Leading the WILD 2.0 rebuild from legacy Web Forms to React, TypeScript, and ASP.NET Core',
+  'AI-native workflows built on durable memory, MCP, and agent tooling',
 ]
 
 const skills = [
@@ -28,13 +28,13 @@ const selectedProjects = [
   {
     name: 'Dendrite Wiki',
     tagline:
-      'Local-first MCP server published on npm that gives AI coding agents a living docs/wiki markdown knowledge base, project memory, and lightweight rituals. One-command install (npx -y dendrite-wiki) targets nine agent clients including Claude Code, Codex, Cursor, and Copilot. Capsule profile cuts MCP startup overhead from ~5,300 to ~540 tokens.',
+      'Local-first MCP server on npm that gives AI coding agents a living markdown knowledge base, project memory, and lightweight habits. One command (npx -y dendrite-wiki) installs it into nine agent clients, including Claude Code, Codex, Cursor, and Copilot. Its capsule profile cuts MCP startup from ~5,300 to ~540 tokens.',
     stack: 'TypeScript · MCP · Node.js · VitePress · Tree-sitter · npm',
   },
   {
     name: 'DendriteMCP',
     tagline:
-      'Rust memory daemon that gives coding agents durable, searchable context across sessions. SQLite + sqlite-vec for vector recall, a relationship graph with per-edge decay, and a tokio-scheduled subconscious that consolidates memories using a local Ollama model. Ships with an MCP stdio bridge and a React dashboard.',
+      'Rust memory daemon that gives coding agents durable, searchable context across sessions. Uses SQLite + sqlite-vec for vector recall, a relationship graph with per-edge decay, and a background tokio task that consolidates memories with a local Ollama model. Ships with an MCP stdio bridge and a React dashboard.',
     stack: 'Rust · Tokio · Axum · SQLite · MCP · Ollama · React',
   },
 ]
@@ -45,9 +45,9 @@ const experience = [
     role: 'Software Engineer',
     period: 'May 2022 – Present',
     details: [
-      'Core engineer on WILD, a mission-critical naval web-based inventory management system.',
-      'Led WILD 2.0 modernization from VB.NET / ASP.NET 3.5 Web Forms + Oracle to React + TypeScript + ASP.NET Core + MSSQL.',
-      'Defined architecture direction, migration strategy, and feature delivery for a live production environment.',
+      'Core engineer on WILD, a mission-critical naval inventory system.',
+      'Leading the WILD 2.0 rebuild from VB.NET / Web Forms / Oracle to React, TypeScript, ASP.NET Core, and MSSQL.',
+      'Set the architecture direction and migration plan, and deliver features for a live production system.',
     ],
   },
   {
@@ -55,8 +55,8 @@ const experience = [
     role: 'Software Engineer',
     period: 'Sep 2021 – May 2022',
     details: [
-      'Maintained and enhanced the WILD platform under active contract transition.',
-      'Delivered production features and defect fixes on ASP.NET Web Forms + Oracle stack.',
+      'Maintained and improved the WILD platform during a contract transition.',
+      'Shipped production features and fixes on the ASP.NET Web Forms / Oracle stack.',
     ],
   },
   {
@@ -64,8 +64,8 @@ const experience = [
     role: 'Software Engineer',
     period: 'Feb 2019 – Sep 2021',
     details: [
-      'Built and maintained inventory-management features supporting naval operational workflows.',
-      'Partnered with stakeholders to turn requirements into production-ready features.',
+      'Built and maintained inventory features supporting naval operations.',
+      'Worked with stakeholders to turn requirements into production-ready features.',
     ],
   },
   {
@@ -73,8 +73,8 @@ const experience = [
     role: 'Programmer I',
     period: 'Feb 2013 – Nov 2017',
     details: [
-      'Developed functionality for WILD inventory management modules.',
-      'Supported VB.NET and ASP.NET Web Forms code paths in a long-running production system.',
+      'Built functionality for WILD inventory modules.',
+      'Maintained VB.NET and ASP.NET Web Forms code in a long-running production system.',
     ],
   },
   {
@@ -82,8 +82,8 @@ const experience = [
     role: 'Programmer',
     period: '2009 – 2011',
     details: [
-      'Developed new features for SABER, a naval inventory management system using ASP.NET + VB.NET.',
-      'Performed SQL Server data cleanup and maintenance to improve data integrity.',
+      'Built new features for SABER, a naval inventory system on ASP.NET and VB.NET.',
+      'Cleaned and maintained SQL Server data to improve integrity.',
     ],
   },
 ]
@@ -163,11 +163,11 @@ export default function ResumePage() {
             </div>
           </div>
           <p className="mt-6 text-zinc-700 leading-relaxed max-w-3xl">
-            Full-stack engineer with 14 years of production experience and a drive to build
-            things that feel as good as they function. I bring a creative, hands-on approach to
-            every layer of the stack, from architecture decisions to the small UI details that
-            make software genuinely enjoyable to use. Currently deep in AI-native development
-            and looking for teams solving interesting problems. Project write-ups and screenshots at{' '}
+            Full-stack engineer with 14 years of production experience. I care about software
+            that works well and feels good to use, and I'm hands-on across the whole stack, from
+            architecture down to the small UI details. Right now I'm deep in AI-native
+            development and looking for a team solving interesting problems. Write-ups and
+            screenshots at{' '}
             <a
               href="https://mfillalan.github.io/mfillalan-portfolio/"
               target="_blank"

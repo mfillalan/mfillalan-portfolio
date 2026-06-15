@@ -97,8 +97,8 @@ export default function Hero() {
           className="mt-6 mx-auto max-w-2xl text-balance text-lg text-muted-foreground sm:text-xl"
         >
           I'm <span className="text-foreground font-medium">Michael Fillalan</span>, a software
-          engineer with 14 years of production experience, now fully committed to AI-native
-          development. I build systems that work, and interfaces that feel good using them.
+          engineer with 14 years building production systems. Now I'm focused on AI-native
+          development, building software that works well and feels good to use.
         </motion.p>
 
         <motion.div variants={item} className="mt-10 flex items-center justify-center gap-3">

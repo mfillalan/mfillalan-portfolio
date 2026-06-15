@@ -18,7 +18,7 @@ const principles = [
   {
     icon: Target,
     title: 'AI-native fundamentals',
-    body: '14 years of full-stack discipline, now applied to durable agent workflows and tooling.',
+    body: '14 years of full-stack experience, now aimed at durable agent workflows and tooling.',
   },
 ]
 
@@ -51,21 +51,19 @@ export default function About() {
           >
             <p>
               <span className="text-foreground">What started as obsessive curiosity</span> at age
-              11 turned into a 14-year professional career. I'm a hard worker who genuinely
-              enjoys the craft.
+              11 grew into a 14-year career. I work hard, and I genuinely love the craft.
             </p>
             <p>
-              My background is building and modernizing production systems, but what drives me is
-              finding the creative angle inside technical problems. I gravitate toward
-              experiences that feel alive. I believe good software should have the same pull as
-              a great game.
+              I've spent my career building and modernizing production systems. What I enjoy
+              most is finding the creative angle in a technical problem. I'm drawn to software
+              that feels alive, and I think the best software has the same pull as a great game.
             </p>
             <p>
-              <span className="text-foreground">I'm actively looking</span> to work on projects
-              that push boundaries, with teams willing to think differently about what software can
-              be. I've gone deep on AI-native development over the past year and I'm eager to
-              apply that alongside strong full-stack fundamentals wherever creative, motivated
-              people are building something worth building.
+              <span className="text-foreground">Right now I'm looking</span> for projects that
+              push boundaries, with people who think differently about what software can be. I've
+              gone deep on AI-native development this past year, and I want to put it to work next
+              to solid full-stack fundamentals, somewhere a motivated team is building something
+              that matters.
             </p>
           </motion.div>
 

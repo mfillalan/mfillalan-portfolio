@@ -7,7 +7,7 @@ const degrees = [
     degree: 'Master of Science, Information Systems',
     period: '2011 – 2012',
     detail:
-      'Graduate studies focused on enterprise systems, software architecture, and information management.',
+      'Graduate work in enterprise systems, software architecture, and information management.',
   },
   {
     school: 'ECPI University',
@@ -15,7 +15,7 @@ const degrees = [
     concentration: 'Simulation & Game Programming',
     period: '2006 – 2009',
     detail:
-      'Undergraduate program covering software engineering fundamentals, systems design, and applied programming.',
+      'Covered software engineering fundamentals, systems design, and hands-on programming.',
   },
 ]
 

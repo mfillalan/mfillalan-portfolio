@@ -37,8 +37,8 @@ export default function Contact() {
               Let's build something <em className="italic text-primary">good.</em>
             </h2>
             <p className="text-muted-foreground text-lg max-w-xl mx-auto mb-10">
-              Open to new opportunities, collaboration, or just a good conversation about AI,
-              craft, and what software could be.
+              I'm open to new roles, collaboration, or just a good conversation about AI,
+              craft, and where software is headed.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3 items-center justify-center">
