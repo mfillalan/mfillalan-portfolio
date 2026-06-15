@@ -25,6 +25,19 @@ function App() {
     window.location.hash.startsWith('#/resume'),
   )
 
+  // Honor prefers-reduced-motion: the boid canvas runs a continuous rAF loop
+  // that the global CSS reduced-motion rule can't stop, so we gate the mount
+  // here instead. Tracks live changes so toggling the OS setting takes effect.
+  const [reduceMotion, setReduceMotion] = useState(
+    () => window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+  )
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const onChange = () => setReduceMotion(mq.matches)
+    mq.addEventListener('change', onChange)
+    return () => mq.removeEventListener('change', onChange)
+  }, [])
+
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark')
     localStorage.setItem('theme', theme)
@@ -72,7 +85,7 @@ function App() {
 
   return (
     <div className="relative min-h-screen text-foreground">
-      {!isResumeRoute && <AmbientParticles />}
+      {!isResumeRoute && !reduceMotion && <AmbientParticles />}
       <KonamiMatrix />
       <Navbar isResumeRoute={isResumeRoute} theme={theme} onToggleTheme={toggleTheme} />
 
