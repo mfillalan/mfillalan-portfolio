@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ArrowUpRight, X } from 'lucide-react'
+import { ArrowUpRight, Sparkles, X } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { GithubIcon } from './icons'
@@ -19,11 +19,48 @@ interface Project {
   /** "r, g, b" tint applied to fish that shelter at the title card. */
   shelterColor: string
   screenshots?: Screenshot[]
+  /** Spans the grid full-width and shows a "Latest project" badge. */
+  featured?: boolean
 }
 
 const BASE = import.meta.env.BASE_URL
 
 const projects: Project[] = [
+  {
+    title: 'Dendrite Studio',
+    featured: true,
+    summary:
+      'A native Rust and egui desktop app, Obsidian-style, for running operator-supervised AI coding agents. Each workspace gets an in-process Grok agent plus a durable memory and skills substrate that persists across sessions and is exposed to the agent over a localhost MCP server.',
+    role:
+      "Creator and sole engineer. I own the full Rust stack: the eframe/egui desktop UI (file tree, markdown editor, agent chat, and substrate sidebar), the in-process agent loop that drives Grok over OAuth with streaming and tool calls, the dendrite-core substrate crate (memory, skills, missions, and git worktrees), and the localhost MCP server that exposes the substrate back to the agent.",
+    details:
+      "Dendrite Studio is a command center for AI-assisted coding. You open a workspace directory and get a native window with a file tree, a markdown editor, an agent chat panel, and sidebar tabs for the workspace's memory, skills, and mission board. You give the agent its next task, watch it work in the chat, evaluate the output, and iterate. Every workspace carries its own durable `.dendrite/` substrate that stays with the project.\n\nThe app is a Cargo workspace with two crates. `dendrite-core` is the headless substrate: memory, skills, missions, git integration, and the agent loop. `dendrite-studio` is the eframe/egui desktop shell. The agent runs in-process using existing Grok auth (Studio OAuth or the `grok` CLI's saved session), so no API keys are pasted into the app, and the substrate also runs in-process for fast access while exposing a localhost MCP server so the agent can reach memory and skills through a standard interface.\n\nWork is operator-supervised rather than an autonomous swarm. A task has one visible Lead agent accountable for the answer, the edits, and verification. For focused help, the Lead can delegate bounded, read-only work to specialists: a Scout for repo discovery and research, a Reviewer for risk and correctness checks, and a Scribe for documentation and writeups. Specialists report back and earn run experience, while the Lead stays accountable for deciding what to do and applying the changes.\n\nThe substrate is the part I care most about. Memory captures lessons, facts, warnings, and handoffs that survive between sessions and stay explainable on recall. The mission board is an agent-driven kanban with todos, claim leases, and resumable missions. Skills are reusable, versioned workflow recipes the agent can discover and invoke. Everything is local-first and private, and the uninstall test is deliberate: remove Studio tomorrow and your project's `.dendrite/` memory and skills are still plain, useful files on disk.\n\nDendrite Studio is pre-alpha and built ground-up in Rust. It began as an Electron and React prototype, which I removed once the native direction was clear; that earlier implementation is preserved at the `electron-final` git tag. CI builds and tests the workspace on Windows for every push.",
+    impact:
+      'Pulls the Dendrite memory and skills idea into a dedicated desktop surface where one operator can supervise a real coding agent end to end. It is early, but it is the project that best represents where I am putting my energy: native performance, durable agent context, and a human kept firmly in the loop.',
+    tags: ['Rust', 'egui / eframe', 'Desktop App', 'MCP', 'Grok / xAI', 'Multi-Agent', 'Local-First', 'Cargo'],
+    repoUrl: 'https://github.com/mfillalan/dendrite-studio',
+    accent: 'from-amber-500/30 via-orange-500/15 to-transparent',
+    shelterColor: '245, 180, 90',
+    screenshots: [
+      {
+        src: `${BASE}projects/dendrite-studio/01-workspace.png`,
+        caption:
+          'Workspace: file tree, markdown editor, agent chat, and memory / skills / mission-board tabs in one native window.',
+      },
+      {
+        src: `${BASE}projects/dendrite-studio/02-agent-chat.png`,
+        caption: 'Agent chat: the in-process Grok agent streaming its tool calls as it works the current mission.',
+      },
+      {
+        src: `${BASE}projects/dendrite-studio/03-mission-board.png`,
+        caption: 'Mission board: an agent-driven kanban with todos, claim leases, and resumable missions.',
+      },
+      {
+        src: `${BASE}projects/dendrite-studio/04-memory-skills.png`,
+        caption: 'Memory & skills: durable, explainable recall and versioned workflow recipes stored under .dendrite/.',
+      },
+    ],
+  },
   {
     title: 'Dendrite Wiki',
     summary:
@@ -182,7 +219,11 @@ export default function Projects() {
               viewport={{ once: true, margin: '-80px' }}
               transition={{ duration: 0.6, delay: i * 0.1 }}
               whileHover={{ y: -4 }}
-              className="group text-left relative overflow-hidden rounded-2xl border border-border bg-card p-7 hover:border-primary/40 transition-colors"
+              className={`group text-left relative overflow-hidden rounded-2xl border bg-card p-7 transition-colors ${
+                p.featured
+                  ? 'md:col-span-2 border-primary/40 hover:border-primary/60'
+                  : 'border-border hover:border-primary/40'
+              }`}
             >
               {/* Gradient wash specific to project */}
               <div
@@ -198,6 +239,13 @@ export default function Projects() {
                 style={{ zIndex: 1 }}
               />
               <div className="relative" style={{ zIndex: 10 }}>
+                {p.featured && (
+                  <div className="mb-4">
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+                      <Sparkles className="size-3.5" /> Latest project
+                    </span>
+                  </div>
+                )}
                 {/* Title "paper" — the actual shelter. Inline-block so it
                     hugs the title text and reads as a small floating card
                     that the fish hide behind. */}
