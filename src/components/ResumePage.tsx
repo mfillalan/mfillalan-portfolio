@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { ArrowLeft, Globe, Mail, MapPin, Printer } from 'lucide-react'
+import { ArrowLeft, Download, Globe, Mail, MapPin, Printer } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { GithubIcon, LinkedinIcon } from './icons'
@@ -97,9 +97,16 @@ export default function ResumePage() {
             <ArrowLeft className="size-4" /> Back to Portfolio
           </a>
         </Button>
-        <Button onClick={() => window.print()} size="sm">
-          <Printer className="size-4" /> Print / Save as PDF
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button asChild size="sm">
+            <a href={`${import.meta.env.BASE_URL}Michael-Fillalan-Resume.pdf`} download>
+              <Download className="size-4" /> Download PDF
+            </a>
+          </Button>
+          <Button onClick={() => window.print()} size="sm" variant="outline">
+            <Printer className="size-4" /> Print
+          </Button>
+        </div>
       </div>
 
       <motion.article
