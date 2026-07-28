@@ -10,7 +10,6 @@ import Experience from './components/Experience'
 import Contact from './components/Contact'
 import ResumePage from './components/ResumePage'
 import KonamiMatrix from './components/KonamiMatrix'
-import AmbientParticles from './components/AmbientParticles'
 
 type Theme = 'light' | 'dark'
 
@@ -24,19 +23,6 @@ function App() {
   const [isResumeRoute, setIsResumeRoute] = useState(() =>
     window.location.hash.startsWith('#/resume'),
   )
-
-  // Honor prefers-reduced-motion: the boid canvas runs a continuous rAF loop
-  // that the global CSS reduced-motion rule can't stop, so we gate the mount
-  // here instead. Tracks live changes so toggling the OS setting takes effect.
-  const [reduceMotion, setReduceMotion] = useState(
-    () => window.matchMedia('(prefers-reduced-motion: reduce)').matches,
-  )
-  useEffect(() => {
-    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
-    const onChange = () => setReduceMotion(mq.matches)
-    mq.addEventListener('change', onChange)
-    return () => mq.removeEventListener('change', onChange)
-  }, [])
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark')
@@ -61,8 +47,6 @@ function App() {
 
   // Long-press alternative to the keyboard Konami code, so touch users can
   // trigger the easter egg too. 1.5s feels deliberate without being tedious.
-  // konamiPressed drives a progress bar (rendered below) that fills to 100%
-  // exactly as the timer completes, giving real-time visual feedback.
   const KONAMI_HOLD_MS = 1500
   const konamiHoldTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [konamiPressed, setKonamiPressed] = useState(false)
@@ -85,7 +69,6 @@ function App() {
 
   return (
     <div className="relative min-h-screen text-foreground">
-      {!isResumeRoute && !reduceMotion && <AmbientParticles />}
       <KonamiMatrix />
       <Navbar isResumeRoute={isResumeRoute} theme={theme} onToggleTheme={toggleTheme} />
 
@@ -108,12 +91,11 @@ function App() {
       {!isResumeRoute && (
         <footer className="border-t border-border py-10 px-6">
           <div className="container mx-auto max-w-6xl flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
-            <p>© {new Date().getFullYear()} Michael Fillalan.</p>
+            <p>© {new Date().getFullYear()} Michael Fillalan</p>
             <div className="relative">
               <p
-                data-boid-orbit
-                className="font-mono text-xs select-none cursor-pointer transition-all active:scale-110 active:text-primary touch-none"
-                title="Try the Konami code, or hold to trigger"
+                className="font-mono text-xs select-none cursor-pointer transition-opacity hover:text-foreground/80 active:scale-105 touch-none opacity-50 hover:opacity-100"
+                title="Hold to unlock"
                 onTouchStart={beginKonamiHold}
                 onTouchEnd={endKonamiHold}
                 onTouchCancel={endKonamiHold}
@@ -124,11 +106,8 @@ function App() {
               >
                 ↑↑↓↓←→←→BA
               </p>
-              {/* Progress bar that fills 0→100% over the hold duration. Lives
-                  in the same relative wrapper, animates scaleX from 0 to 1
-                  via Framer Motion so it stays GPU-accelerated. */}
               <motion.div
-                className="pointer-events-none absolute -bottom-1.5 left-0 right-0 h-[2px] origin-left rounded-full bg-primary"
+                className="pointer-events-none absolute -bottom-1.5 left-0 right-0 h-px origin-left rounded-full bg-primary"
                 initial={{ scaleX: 0 }}
                 animate={{ scaleX: konamiPressed ? 1 : 0 }}
                 transition={{

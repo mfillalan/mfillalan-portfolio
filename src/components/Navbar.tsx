@@ -55,7 +55,7 @@ export default function Navbar({ isResumeRoute, theme, onToggleTheme }: NavbarPr
       />
 
       <header className="no-print fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[min(960px,calc(100%-1.5rem))]">
-        <nav className="flex items-center justify-between gap-3 rounded-full border border-border bg-background/70 px-4 py-2 backdrop-blur-xl shadow-lg shadow-black/5">
+        <nav className="flex items-center justify-between gap-3 rounded-full border border-border/80 bg-background/80 px-4 py-2 backdrop-blur-xl shadow-sm shadow-black/5">
           <a
             href="#/"
             className="font-sans text-sm font-semibold tracking-tight pl-2 pr-1 hover:text-primary transition-colors whitespace-nowrap"

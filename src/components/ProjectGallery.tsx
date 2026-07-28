@@ -115,7 +115,7 @@ export default function ProjectGallery({ screenshots }: Props) {
         ))}
       </div>
 
-      {/* Fullscreen lightbox — portaled to body so it escapes the project
+      {/* Fullscreen lightbox , portaled to body so it escapes the project
           modal's stacking context (the modal sets willChange:transform, which
           would otherwise trap this `fixed` element inside the modal's bounds). */}
       {createPortal(

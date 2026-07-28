@@ -73,19 +73,19 @@ export default function Experience() {
   const lineScale = useTransform(scrollYProgress, [0, 1], [0, 1])
 
   return (
-    <section id="experience" className="py-32 px-6">
+    <section id="experience" className="py-28 px-6">
       <div className="container mx-auto max-w-5xl">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-100px' }}
-          transition={{ duration: 0.6 }}
-          className="max-w-2xl mb-16"
+          transition={{ duration: 0.5 }}
+          className="max-w-2xl mb-14"
         >
-          <p className="font-mono text-xs uppercase tracking-[0.2em] text-primary mb-4">
-            04 / Experience
+          <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground mb-4">
+            Experience
           </p>
-          <h2 className="font-display text-4xl sm:text-5xl tracking-tight text-balance">
+          <h2 className="font-display text-3xl sm:text-5xl tracking-tight text-balance">
             14 years of shipping.
           </h2>
         </motion.div>

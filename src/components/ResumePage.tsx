@@ -28,13 +28,13 @@ const selectedProjects = [
   {
     name: 'Tendrite',
     tagline:
-      'Local-first coding command center. Native desktop workspace that unifies projects, multi-agent missions, memory substrate, git-native review, and model routing — with a phone companion for steering work away from the desk. Open core; free local workspace at tendrite.dev.',
+      'Local-first coding command center. Native desktop workspace that unifies projects, multi-agent missions, memory substrate, git-native review, and model routing, with a phone companion for steering work away from the desk. Open core; free local workspace at tendrite.dev.',
     stack: 'Desktop · Local-First · Multi-Agent · Memory · Git · Model Routing',
   },
   {
     name: 'WILD 2.0',
     tagline:
-      'Lead engineer on the ground-up rebuild of a mission-critical naval inventory platform — from legacy VB.NET / Web Forms / Oracle onto .NET 8, EF Core, React 19, and an offline-first PWA. In testing ahead of full cutover.',
+      'Lead engineer on the ground-up rebuild of a mission-critical naval inventory platform, from legacy VB.NET / Web Forms / Oracle onto .NET 8, EF Core, React 19, and an offline-first PWA. In testing ahead of full cutover.',
     stack: '.NET 8 · ASP.NET Core · React 19 · TypeScript · MSSQL · PWA',
   },
   {

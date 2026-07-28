@@ -8,20 +8,6 @@ interface MagneticProps {
   /** Invisible padding around the button that acts as the sensing area. */
   range?: number
   className?: string
-  /**
-   * If true, marks the inner element as a "shelter" that ambient boids
-   * gravitate toward and hide behind. Boids scatter when the cursor
-   * approaches (the existing cursor-flee force handles dispersion).
-   */
-  shelter?: boolean
-  /**
-   * Pulls sheltered boids deep into the chip so only the front of the
-   * triangle pokes past the edge. Use for buttons where boids should
-   * "barely peek their heads out" instead of forming a halo around it.
-   */
-  shelterTight?: boolean
-  /** Optional "r, g, b" string applied to sheltered/nearby boids. */
-  shelterColor?: string
 }
 
 /**
@@ -37,18 +23,15 @@ interface MagneticProps {
  */
 export function Magnetic({
   children,
-  strength = 0.35,
-  range = 28,
+  strength = 0.28,
+  range = 24,
   className,
-  shelter = false,
-  shelterTight = false,
-  shelterColor,
 }: MagneticProps) {
   const ref = useRef<HTMLDivElement>(null)
   const x = useMotionValue(0)
   const y = useMotionValue(0)
-  const sx = useSpring(x, { stiffness: 220, damping: 18, mass: 0.4 })
-  const sy = useSpring(y, { stiffness: 220, damping: 18, mass: 0.4 })
+  const sx = useSpring(x, { stiffness: 220, damping: 20, mass: 0.4 })
+  const sy = useSpring(y, { stiffness: 220, damping: 20, mass: 0.4 })
 
   return (
     <div
@@ -69,14 +52,7 @@ export function Magnetic({
         y.set(0)
       }}
     >
-      <motion.div
-        style={{ x: sx, y: sy, display: 'inline-block' }}
-        {...(shelter ? { 'data-boid-shelter': '' } : {})}
-        {...(shelter && shelterTight ? { 'data-boid-shelter-tight': '' } : {})}
-        {...(shelter && shelterColor ? { 'data-boid-shelter-color': shelterColor } : {})}
-      >
-        {children}
-      </motion.div>
+      <motion.div style={{ x: sx, y: sy, display: 'inline-block' }}>{children}</motion.div>
     </div>
   )
 }

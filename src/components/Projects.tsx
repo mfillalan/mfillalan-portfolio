@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ArrowUpRight, Sparkles, X } from 'lucide-react'
+import { ArrowUpRight, X } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { GithubIcon } from './icons'
@@ -16,10 +16,8 @@ interface Project {
   repoUrl?: string
   liveUrl?: string
   accent: string
-  /** "r, g, b" tint applied to fish that shelter at the title card. */
-  shelterColor: string
   screenshots?: Screenshot[]
-  /** Spans the grid full-width and shows a "Latest project" badge. */
+  /** Spans the grid full-width and shows a Featured badge. */
   featured?: boolean
 }
 
@@ -30,13 +28,13 @@ const projects: Project[] = [
     title: 'Tendrite',
     featured: true,
     summary:
-      'A local-first coding command center. Tendrite turns projects, agents, memory, source control, and decisions into one native desktop workspace so you can ship work that matters — not babysit chat tabs.',
+      'A local-first coding command center. Tendrite turns projects, agents, memory, source control, and decisions into one native desktop workspace so you can ship work that matters, not babysit chat tabs.',
     role:
       'Creator and sole engineer. I design and build the full product: the native desktop workspace, the memory substrate, mission and campaign orchestration, git-native review, multi-provider model routing, the phone companion (Tendrite Codec), and the open-core product surface at tendrite.dev.',
     details:
-      "Tendrite is a local-first command center for agentic coding. Open a project and you get one operating surface for the file tree, editor, agent console, source control, memory, skills, and mission board — so the work stays inspectable from the first plan to the final review instead of scattered across a terminal, browser, and chat tabs.\n\nIt is not a chat wrapper. You set a bounded objective, assign focused agent roles, and watch a live campaign board show where the team is, what is blocked, and which decision needs you next. Agents capture facts, lessons, warnings, and handoffs as they go; each new task gets a focused brief drawn from keyword, semantic, and relationship signals rather than a dump of the whole archive. You stay in control: pin what matters, consolidate or retire stale knowledge, and keep archived memories recoverable.\n\nModel independence is built in. Connect the subscriptions, API keys, or local models you already trust — the workspace does not force one provider. Git-native review keeps impact and diffs beside the agent work. When you step away, the Tendrite Codec phone companion lets you follow live runs, answer agent questions, switch projects, and steer the next move over your own network path or an optional managed Cloud relay.\n\nThe product is open core and ships as a desktop beta for Windows and Linux (macOS when a signed Apple build is ready). Free covers the full local workspace; Pro unlocks connected multi-project and phone capabilities. Your code and project brain stay on your machine. Same test as the rest of my work: the useful state should outlive the app.\n\nTendrite grew out of the Dendrite line of experiments (memory daemon, wiki MCP, early studio prototype). The through-line was always the same: agents that remember, work you can steer, and less friction between intent and shipped change.",
+      "Tendrite is a local-first command center for agentic coding. Open a project and you get one operating surface for the file tree, editor, agent console, source control, memory, skills, and mission board, so the work stays inspectable from the first plan to the final review instead of scattered across a terminal, browser, and chat tabs.\n\nIt is not a chat wrapper. You set a bounded objective, assign focused agent roles, and watch a live campaign board show where the team is, what is blocked, and which decision needs you next. Agents capture facts, lessons, warnings, and handoffs as they go; each new task gets a focused brief drawn from keyword, semantic, and relationship signals rather than a dump of the whole archive. You stay in control: pin what matters, consolidate or retire stale knowledge, and keep archived memories recoverable.\n\nModel independence is built in. Connect the subscriptions, API keys, or local models you already trust. The workspace does not force one provider. Git-native review keeps impact and diffs beside the agent work. When you step away, the Tendrite Codec phone companion lets you follow live runs, answer agent questions, switch projects, and steer the next move over your own network path or an optional managed Cloud relay.\n\nThe product is open core and ships as a desktop beta for Windows and Linux (macOS when a signed Apple build is ready). Free covers the full local workspace; Pro unlocks connected multi-project and phone capabilities. Your code and project brain stay on your machine. Same test as the rest of my work: the useful state should outlive the app.\n\nTendrite grew out of the Dendrite line of experiments (memory daemon, wiki MCP, early studio prototype). The through-line was always the same: agents that remember, work you can steer, and less friction between intent and shipped change.",
     impact:
-      'Turns agentic coding from tab-juggling into an operable workflow: missions with a real board, memory that survives the next session, git review in the same surface, and a phone companion when you step away. It is the project that best shows where my energy is right now — local-first systems, multi-agent orchestration, and software that feels good to direct.',
+      'Turns agentic coding from tab-juggling into an operable workflow: missions with a real board, memory that survives the next session, git review in the same surface, and a phone companion when you step away. It is the project that best shows where my energy is right now: local-first systems, multi-agent orchestration, and software that feels good to direct.',
     tags: [
       'Desktop App',
       'Local-First',
@@ -51,7 +49,6 @@ const projects: Project[] = [
     repoUrl: 'https://github.com/mfillalan/tendrite',
     liveUrl: 'https://tendrite.dev',
     accent: 'from-violet-500/30 via-fuchsia-500/15 to-transparent',
-    shelterColor: '180, 140, 255',
     screenshots: [
       {
         src: `${BASE}projects/tendrite/01-workspace.webp`,
@@ -76,7 +73,7 @@ const projects: Project[] = [
       {
         src: `${BASE}projects/tendrite/05-campaign-map.webp`,
         caption:
-          'Campaign map: give long-running work a shape you can scan — objectives, squad, and blockers.',
+          'Campaign map: give long-running work a shape you can scan: objectives, squad, and blockers.',
       },
       {
         src: `${BASE}projects/tendrite/06-source-control.webp`,
@@ -107,7 +104,6 @@ const projects: Project[] = [
       "Replaces the legacy stack completely at cutover. It makes hiring viable again on a modern platform, clears the old security and integration debt, and adds things the old stack couldn't realistically do: offline operation, real-time status, and modern auth.",
     tags: ['.NET 8', 'C#', 'ASP.NET Core', 'EF Core', 'React 19', 'TypeScript', 'MSSQL', 'Dapper', 'Vite', 'PWA', 'SignalR'],
     accent: 'from-cyan-500/30 via-blue-500/15 to-transparent',
-    shelterColor: '90, 180, 230',
     screenshots: [
       {
         src: `${BASE}projects/wild2/01-dashboard.png`,
@@ -137,7 +133,6 @@ const projects: Project[] = [
     repoUrl: 'https://github.com/mfillalan/dendrite-wiki-mcp',
     liveUrl: 'https://www.npmjs.com/package/dendrite-wiki',
     accent: 'from-emerald-500/30 via-teal-500/15 to-transparent',
-    shelterColor: '90, 210, 170',
     screenshots: [
       {
         src: `${BASE}projects/dendrite-wiki/01-wiki-page.png`,
@@ -158,32 +153,20 @@ const projects: Project[] = [
 export default function Projects() {
   const [selected, setSelected] = useState<Project | null>(null)
 
-  // Pause the ambient boid simulation while a project modal is open. The
-  // layoutId card→dialog morph is layout-measurement-heavy and the boid
-  // canvas competes with it for main-thread time.
-  useEffect(() => {
-    if (!selected) return
-    const root = document.documentElement
-    root.dataset.boidsPaused = '1'
-    return () => {
-      delete root.dataset.boidsPaused
-    }
-  }, [selected])
-
   return (
-    <section id="projects" className="py-32 px-6">
+    <section id="projects" className="py-28 px-6">
       <div className="container mx-auto max-w-6xl">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-100px' }}
           transition={{ duration: 0.6 }}
-          className="max-w-2xl mb-16"
+          className="max-w-2xl mb-14"
         >
-          <p className="font-mono text-xs uppercase tracking-[0.2em] text-primary mb-4">
-            02 / Projects
+          <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground mb-4">
+            Projects
           </p>
-          <h2 className="font-display text-4xl sm:text-5xl tracking-tight text-balance">
+          <h2 className="font-display text-3xl sm:text-5xl tracking-tight text-balance">
             Selected work.
           </h2>
         </motion.div>
@@ -201,47 +184,27 @@ export default function Projects() {
               viewport={{ once: true, margin: '-80px' }}
               transition={{ duration: 0.6, delay: i * 0.1 }}
               whileHover={{ y: -4 }}
-              className={`group text-left relative overflow-hidden rounded-2xl border bg-card p-7 transition-colors ${
+              className={`group text-left relative overflow-hidden rounded-xl border bg-card p-7 transition-colors ${
                 p.featured
-                  ? 'md:col-span-2 border-primary/40 hover:border-primary/60'
-                  : 'border-border hover:border-primary/40'
+                  ? 'md:col-span-2 border-primary/30 hover:border-primary/50'
+                  : 'border-border hover:border-foreground/20'
               }`}
             >
               {/* Gradient wash specific to project */}
               <div
-                className={`absolute -top-24 -right-24 w-64 h-64 rounded-full bg-gradient-to-br ${p.accent} blur-3xl opacity-60 pointer-events-none`}
+                className={`absolute -top-24 -right-24 w-64 h-64 rounded-full bg-gradient-to-br ${p.accent} blur-3xl opacity-40 pointer-events-none`}
               />
-              {/* Mirror canvas so wandering fish are visible inside the
-                  project card (without it, the card's bg-card occludes them
-                  on the global background canvas). */}
-              <canvas
-                data-boid-mirror
-                aria-hidden
-                className="pointer-events-none absolute inset-0 size-full"
-                style={{ zIndex: 1 }}
-              />
-              <div className="relative" style={{ zIndex: 10 }}>
+              <div className="relative">
                 {p.featured && (
                   <div className="mb-4">
-                    <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-                      <Sparkles className="size-3.5" /> Latest project
+                    <span className="inline-flex items-center rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+                      Featured
                     </span>
                   </div>
                 )}
-                {/* Title "paper" — the actual shelter. Inline-block so it
-                    hugs the title text and reads as a small floating card
-                    that the fish hide behind. */}
-                <div className="mb-4">
-                  <div
-                    className="inline-block rounded-lg bg-card border border-border px-4 py-1.5 shadow-lg shadow-black/20"
-                    data-boid-shelter
-                    data-boid-shelter-color={p.shelterColor}
-                  >
-                    <h3 className="font-display text-3xl tracking-tight">
-                      {p.title}
-                    </h3>
-                  </div>
-                </div>
+                <h3 className="font-display text-2xl sm:text-3xl tracking-tight mb-3">
+                  {p.title}
+                </h3>
                 <p className="text-muted-foreground leading-relaxed mb-6">{p.summary}</p>
                 <div className="flex flex-wrap gap-2 mb-6">
                   {p.tags.slice(0, 5).map((t) => (
@@ -256,7 +219,7 @@ export default function Projects() {
                   )}
                 </div>
                 <div className="flex items-center gap-2 text-sm font-medium text-primary">
-                  Read the case study
+                  View case study
                   <ArrowUpRight className="size-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                 </div>
               </div>
@@ -382,7 +345,7 @@ function Section({
 }) {
   return (
     <div>
-      <h4 className="font-mono text-xs uppercase tracking-[0.18em] text-primary mb-3">
+      <h4 className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground mb-3">
         {title}
       </h4>
       <p
