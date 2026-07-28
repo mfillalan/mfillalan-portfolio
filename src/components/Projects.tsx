@@ -96,6 +96,34 @@ const projects: Project[] = [
     ],
   },
   {
+    title: 'WILD 2.0',
+    summary:
+      "Lead engineer on the ground-up rebuild of a mission-critical naval inventory platform. It is a full rewrite of the legacy VB.NET / ASP.NET 3.5 Web Forms / Oracle stack onto .NET 8, EF Core, React 19, and an offline-first PWA built with Vite. It is in testing now, ahead of the full cutover.",
+    role:
+      "Lead engineer. I own the architecture direction, the rebuild plan, and core feature delivery. A lot of the job is balancing the ideal engineering choice against a hard reality: the old system has to keep running in production until the new one is fully ready.",
+    details:
+      "WILD runs real naval inventory operations, and it was sitting on a stack well past its prime: VB.NET on ASP.NET 3.5 Web Forms talking to Oracle. It was getting harder to maintain, harder to secure, harder to hire for, and harder to integrate with. Since the old system has to keep running until the new one is ready, patching it further didn't make sense. The new build had to be a clean replacement good enough to earn the switch on its own.\n\nBecause it is a ground-up rebuild, the design isn't tied to the old system's choices. A new ASP.NET Core API on .NET 8 sits behind a generic repository layer over Entity Framework Core 8 on MSSQL, with a Dapper data project for the hand-tuned SQL where an ORM gets in the way. Multitenancy is handled at the query layer: a runtime DbContext factory resolves each user's schema, with TTL caching and semaphore-guarded concurrency.\n\nThe front end is React 19 and TypeScript 5 on Vite, with Material-UI and Kendo for components, Zustand for client state, and TanStack Query for server state. Field work sometimes happens with little or no connectivity, so it is an offline-first PWA: Dexie/IndexedDB stores data locally, a delta queue holds outgoing writes, and a Workbox service worker caches by asset type and uses Background Sync to reconcile writes once the connection is back.\n\nOn the operations side: structured Serilog logging with correlation IDs for tracing requests across services, a custom AppException and middleware pattern that maps domain errors to clean HTTP responses, real-time SignalR hubs (backed by hosted background services) for status and notifications, built-in Swagger, and a Docusaurus docs site served from the API. It is in testing ahead of cutover. This is an active, government-adjacent system, so I keep public detail light, but the short version is a full modern rewrite under live operational constraints.",
+    impact:
+      "Replaces the legacy stack completely at cutover. It makes hiring viable again on a modern platform, clears the old security and integration debt, and adds things the old stack couldn't realistically do: offline operation, real-time status, and modern auth.",
+    tags: ['.NET 8', 'C#', 'ASP.NET Core', 'EF Core', 'React 19', 'TypeScript', 'MSSQL', 'Dapper', 'Vite', 'PWA', 'SignalR'],
+    accent: 'from-cyan-500/30 via-blue-500/15 to-transparent',
+    shelterColor: '90, 180, 230',
+    screenshots: [
+      {
+        src: `${BASE}projects/wild2/01-dashboard.png`,
+        caption: 'Dashboard: operational overview at a glance.',
+      },
+      {
+        src: `${BASE}projects/wild2/02-warehouse-editor.png`,
+        caption: 'Warehouse editor: configure storage layout and zones.',
+      },
+      {
+        src: `${BASE}projects/wild2/03-location-selector.png`,
+        caption: 'Location selector: drill into specific warehouse positions.',
+      },
+    ],
+  },
+  {
     title: 'Dendrite Wiki',
     summary:
       'A local-first MCP server that gives AI coding agents a living `docs/wiki/` knowledge base, project memory, and a few good habits. One command, `npx -y dendrite-wiki`, installs it into any agent client. It is on npm and works out of the box with Claude Code, Codex, Cursor, Copilot, Continue, Grok, Windsurf, and Antigravity.',
@@ -124,87 +152,7 @@ const projects: Project[] = [
         caption: 'Item detail: a memory entry with reasons and source-backed claims.',
       },
     ],
-  },
-  {
-    title: 'DendriteMCP',
-    summary:
-      'A Rust memory daemon that gives coding agents durable, searchable context across sessions. It is built on SQLite with vector search and a relationship graph, plus a background scheduler that cleans up and consolidates memories on its own using a local LLM.',
-    role:
-      'Creator and sole engineer. I designed the architecture and built every layer: the Rust core daemon, the MCP stdio bridge, the SQLite schema with vector indexes, the React dashboard, and the Ollama integration. Right now I am building out the memory-decay, drift-detection, and assumption-checking pieces.',
-    details:
-      "Most coding agents forget everything between sessions. Context and past decisions get rebuilt from scratch every run, which means drift, a lot of repeated explaining, and wasted tool calls. DendriteMCP fixes that with one local daemon that agents can write to and read back from over standard MCP.\n\nThe core is a Rust service on Axum and tokio. All state lives behind an r2d2-pooled SQLite database that uses sqlite-vec for 384-dimensional vector search and FTS5 for full-text, plus a relationship graph (a `node_edges` table) where different edge types fade at different rates. A small TypeScript bridge passes JSON-RPC traffic from agents like Claude Code, Cursor, Copilot, and Codex to the daemon's HTTP endpoints, and handles auto-restart and finding the binary.\n\nMemory comes in three tiers: working (just this session), episodic (a time-ordered log), and semantic (consolidated facts), each with its own decay and embedding rules. Recall happens in two passes: keyword and embedding search pull candidates, then an LLM reranks them. A physarum-inspired (slime-mold) path-flux algorithm walks the graph to surface related work and memories that aren't directly linked.\n\nA background 'subconscious' runs every few minutes on the same tokio runtime. It replays related memories, looks for contradictions, and rolls episodic logs up into semantic facts using a local Ollama model. If Ollama isn't available, it falls back to keyword and embedding scoring so it still works offline.\n\nThe daemon also serves a React + Vite dashboard at /dashboard, styled like a starship bridge, with quests, skills, a knowledge graph, and a live activity feed over SSE. It makes the engineering easy to see at a glance instead of buried in logs.",
-    impact:
-      "Gives AI-assisted coding real continuity: context that carries over, decisions you can trace back, and a growing store of reusable project knowledge.",
-    tags: ['Rust', 'Tokio', 'Axum', 'SQLite', 'Vector Search', 'React', 'TypeScript', 'MCP', 'Ollama', 'Knowledge Graph'],
-    accent: 'from-amber-500/30 via-orange-500/15 to-transparent',
-    shelterColor: '245, 180, 90',
-    screenshots: [
-      {
-        src: `${BASE}projects/dendritemcp/01-bridge.png`,
-        caption: 'Bridge: the Constellation view shows the active mission spread.',
-      },
-      {
-        src: `${BASE}projects/dendritemcp/02-skill-tree.png`,
-        caption: 'Skill Tree: weekly progression heatmap across capability areas.',
-      },
-      {
-        src: `${BASE}projects/dendritemcp/03-knowledge-graph.png`,
-        caption: 'Knowledge Graph: skills as nodes, relationships as edges.',
-      },
-      {
-        src: `${BASE}projects/dendritemcp/04-quest-beat.png`,
-        caption: 'Quest Heat: heatmap grouping quests by recent activity.',
-      },
-      {
-        src: `${BASE}projects/dendritemcp/05-throughput.png`,
-        caption: 'Throughput: quest velocity with projected completion.',
-      },
-      {
-        src: `${BASE}projects/dendritemcp/06-library.png`,
-        caption: 'Library: captured artifacts, patterns, and runbooks.',
-      },
-      {
-        src: `${BASE}projects/dendritemcp/07-article.png`,
-        caption: 'Article: full-text drill-down with chunked sections.',
-      },
-      {
-        src: `${BASE}projects/dendritemcp/08-skill-detail.png`,
-        caption: 'Skill detail: observations gathered from real work over time.',
-      },
-      {
-        src: `${BASE}projects/dendritemcp/09-chronicle.png`,
-        caption: 'Chronicle: the live activity stream of completed quests.',
-      },
-    ],
-  },
-  {
-    title: 'WILD 2.0',
-    summary:
-      "Lead engineer on the ground-up rebuild of a mission-critical naval inventory platform. It is a full rewrite of the legacy VB.NET / ASP.NET 3.5 Web Forms / Oracle stack onto .NET 8, EF Core, React 19, and an offline-first PWA built with Vite. It is in testing now, ahead of the full cutover.",
-    role:
-      "Lead engineer. I own the architecture direction, the rebuild plan, and core feature delivery. A lot of the job is balancing the ideal engineering choice against a hard reality: the old system has to keep running in production until the new one is fully ready.",
-    details:
-      "WILD runs real naval inventory operations, and it was sitting on a stack well past its prime: VB.NET on ASP.NET 3.5 Web Forms talking to Oracle. It was getting harder to maintain, harder to secure, harder to hire for, and harder to integrate with. Since the old system has to keep running until the new one is ready, patching it further didn't make sense. The new build had to be a clean replacement good enough to earn the switch on its own.\n\nBecause it is a ground-up rebuild, the design isn't tied to the old system's choices. A new ASP.NET Core API on .NET 8 sits behind a generic repository layer over Entity Framework Core 8 on MSSQL, with a Dapper data project for the hand-tuned SQL where an ORM gets in the way. Multitenancy is handled at the query layer: a runtime DbContext factory resolves each user's schema, with TTL caching and semaphore-guarded concurrency.\n\nThe front end is React 19 and TypeScript 5 on Vite, with Material-UI and Kendo for components, Zustand for client state, and TanStack Query for server state. Field work sometimes happens with little or no connectivity, so it is an offline-first PWA: Dexie/IndexedDB stores data locally, a delta queue holds outgoing writes, and a Workbox service worker caches by asset type and uses Background Sync to reconcile writes once the connection is back.\n\nOn the operations side: structured Serilog logging with correlation IDs for tracing requests across services, a custom AppException and middleware pattern that maps domain errors to clean HTTP responses, real-time SignalR hubs (backed by hosted background services) for status and notifications, built-in Swagger, and a Docusaurus docs site served from the API. It is in testing ahead of cutover. This is an active, government-adjacent system, so I keep public detail light, but the short version is a full modern rewrite under live operational constraints.",
-    impact:
-      "Replaces the legacy stack completely at cutover. It makes hiring viable again on a modern platform, clears the old security and integration debt, and adds things the old stack couldn't realistically do: offline operation, real-time status, and modern auth.",
-    tags: ['.NET 8', 'C#', 'ASP.NET Core', 'EF Core', 'React 19', 'TypeScript', 'MSSQL', 'Dapper', 'Vite', 'PWA', 'SignalR'],
-    accent: 'from-cyan-500/30 via-blue-500/15 to-transparent',
-    shelterColor: '90, 180, 230',
-    screenshots: [
-      {
-        src: `${BASE}projects/wild2/01-dashboard.png`,
-        caption: 'Dashboard: operational overview at a glance.',
-      },
-      {
-        src: `${BASE}projects/wild2/02-warehouse-editor.png`,
-        caption: 'Warehouse editor: configure storage layout and zones.',
-      },
-      {
-        src: `${BASE}projects/wild2/03-location-selector.png`,
-        caption: 'Location selector: drill into specific warehouse positions.',
-      },
-    ],
-  },
+  }
 ]
 
 export default function Projects() {

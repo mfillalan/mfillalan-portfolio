@@ -32,16 +32,16 @@ const selectedProjects = [
     stack: 'Desktop · Local-First · Multi-Agent · Memory · Git · Model Routing',
   },
   {
+    name: 'WILD 2.0',
+    tagline:
+      'Lead engineer on the ground-up rebuild of a mission-critical naval inventory platform — from legacy VB.NET / Web Forms / Oracle onto .NET 8, EF Core, React 19, and an offline-first PWA. In testing ahead of full cutover.',
+    stack: '.NET 8 · ASP.NET Core · React 19 · TypeScript · MSSQL · PWA',
+  },
+  {
     name: 'Dendrite Wiki',
     tagline:
       'Local-first MCP server on npm that gives AI coding agents a living markdown knowledge base, project memory, and lightweight habits. One command (npx -y dendrite-wiki) installs it into nine agent clients, including Claude Code, Codex, Cursor, and Copilot. Its capsule profile cuts MCP startup from ~5,300 to ~540 tokens.',
     stack: 'TypeScript · MCP · Node.js · VitePress · Tree-sitter · npm',
-  },
-  {
-    name: 'DendriteMCP',
-    tagline:
-      'Rust memory daemon that gives coding agents durable, searchable context across sessions. Uses SQLite + sqlite-vec for vector recall, a relationship graph with per-edge decay, and a background tokio task that consolidates memories with a local Ollama model. Ships with an MCP stdio bridge and a React dashboard.',
-    stack: 'Rust · Tokio · Axum · SQLite · MCP · Ollama · React',
   },
 ]
 
