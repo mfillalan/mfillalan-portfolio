@@ -120,7 +120,7 @@ export default function ResumePage() {
         <header className="border-b border-zinc-200 pb-6 mb-8">
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
             <div>
-              <h1 className="resume-strong font-sans text-4xl sm:text-5xl font-bold tracking-tight text-zinc-900">
+              <h1 className="resume-strong font-display text-4xl sm:text-5xl tracking-tight text-zinc-900">
                 Michael Fillalan
               </h1>
               <p className="resume-muted text-lg text-zinc-600 mt-1">Software Engineer</p>
@@ -281,8 +281,12 @@ function ContactRow({
 }
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  // Do NOT put resume-avoid-break on the whole section — Experience/Projects
+  // are taller than leftover page-1 space and Chrome/Edge will shove the
+  // entire two-column grid onto page 2 (huge empty gap under the intro).
+  // Individual job/project cards already use resume-avoid-break.
   return (
-    <section className="resume-avoid-break">
+    <section>
       <h2 className="resume-faint font-mono text-[11px] uppercase tracking-[0.18em] text-zinc-600 mb-3 pb-2 border-b border-zinc-300">
         {title}
       </h2>

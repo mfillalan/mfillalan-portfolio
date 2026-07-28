@@ -321,17 +321,14 @@
   html { scroll-behavior: auto !important; }
 }
 
-/* Print rules for resume.
-   Why print still washes out even with color:!important:
-   1) html.dark keeps light oklch design tokens on ancestors
-   2) -webkit-font-smoothing: antialiased + thin Instrument Serif
-      rasterize to pale gray ink in Chrome/Edge print
-   3) Download PDF may be a stale static file, not browser print
-   Nuclear fix: pure #000 ink, no smoothing, sans for body, rewrite
-   .dark tokens to light values while printing. */
+/* Print rules for resume — MATCH the on-screen sheet, don't redesign it.
+   Past over-corrections (pure #000 everywhere, force Inter, break-inside:avoid
+   on whole sections) caused: huge empty gap under the intro, lost color
+   hierarchy, and different fonts than the page. Goal: same Instrument Serif
+   name, same zinc grays, same two-column layout, readable on paper. */
 @page {
   size: letter;
-  margin: 0.5in;
+  margin: 0.45in;
 }
 
 @media print {
@@ -339,41 +336,45 @@
     display: none !important;
   }
 
-  /* Rewrite every theme token so nothing inherits pale dark-mode ink. */
+  /* Light theme tokens so dark-mode html doesn't wash zinc utilities. */
   :root,
   html,
   html.dark,
   .dark {
     color-scheme: only light !important;
     --background: #ffffff !important;
-    --foreground: #000000 !important;
+    --foreground: #18181b !important;
     --card: #ffffff !important;
-    --card-foreground: #000000 !important;
+    --card-foreground: #18181b !important;
     --popover: #ffffff !important;
-    --popover-foreground: #000000 !important;
-    --primary: #000000 !important;
+    --popover-foreground: #18181b !important;
+    --primary: #18181b !important;
     --primary-foreground: #ffffff !important;
     --secondary: #f4f4f5 !important;
-    --secondary-foreground: #000000 !important;
+    --secondary-foreground: #18181b !important;
     --muted: #f4f4f5 !important;
-    --muted-foreground: #111111 !important;
+    --muted-foreground: #52525b !important;
     --accent: #f4f4f5 !important;
-    --accent-foreground: #000000 !important;
-    --border: #a1a1aa !important;
-    --input: #a1a1aa !important;
-    --ring: #000000 !important;
+    --accent-foreground: #18181b !important;
+    --border: #e4e4e7 !important;
+    --input: #e4e4e7 !important;
+    --ring: #18181b !important;
+    /* Real zinc ladder — same hierarchy as the on-screen resume. */
     --color-zinc-200: #e4e4e7 !important;
     --color-zinc-300: #d4d4d8 !important;
-    --color-zinc-400: #52525b !important;
-    --color-zinc-500: #3f3f46 !important;
-    --color-zinc-600: #18181b !important;
-    --color-zinc-700: #09090b !important;
-    --color-zinc-800: #000000 !important;
-    --color-zinc-900: #000000 !important;
+    --color-zinc-400: #a1a1aa !important;
+    --color-zinc-500: #71717a !important;
+    --color-zinc-600: #52525b !important;
+    --color-zinc-700: #3f3f46 !important;
+    --color-zinc-800: #27272a !important;
+    --color-zinc-900: #18181b !important;
     --color-white: #ffffff !important;
     --color-black: #000000 !important;
+    --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif !important;
+    --font-display: "Instrument Serif", "Fraunces", ui-serif, Georgia, serif !important;
+    --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace !important;
     background: #ffffff !important;
-    color: #000000 !important;
+    color: #18181b !important;
   }
 
   html,
@@ -382,14 +383,12 @@
   main,
   .relative.min-h-screen {
     background: #ffffff !important;
-    color: #000000 !important;
-    /* Antialiased + thin display faces print as gray fog. */
+    color: #18181b !important;
+    /* Slightly heavier raster than antialiased — still allows display faces. */
     -webkit-font-smoothing: auto !important;
     -moz-osx-font-smoothing: auto !important;
-    font-smooth: never !important;
   }
 
-  /* Kill residual Framer Motion / animation styles that wash out type. */
   *,
   *::before,
   *::after {
@@ -400,13 +399,12 @@
     filter: none !important;
     backdrop-filter: none !important;
     mix-blend-mode: normal !important;
-    opacity: 1 !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
-    -webkit-font-smoothing: auto !important;
-    -moz-osx-font-smoothing: auto !important;
   }
 
+  /* Only kill leftover motion opacity/transform — do NOT force opacity:1 on
+     every element (that fights intentional hierarchy and can confuse layout). */
   [style*='transform'],
   [style*='opacity'],
   [style*='filter'] {
@@ -423,11 +421,10 @@
     text-decoration: none !important;
   }
 
-  /* Resume sheet: pure black ink on white paper. */
+  /* Sheet chrome: same white card, no shadow, fill the page. */
   .resume-sheet {
     background: #ffffff !important;
-    color: #000000 !important;
-    -webkit-text-fill-color: #000000 !important;
+    color: #18181b !important;
     max-width: none !important;
     width: 100% !important;
     margin: 0 !important;
@@ -435,103 +432,109 @@
     border-radius: 0 !important;
     box-shadow: none !important;
     overflow: visible !important;
-    /* Serif display face is too light for toner/PDF; force Inter. */
-    font-family: "Inter", ui-sans-serif, system-ui, sans-serif !important;
+    font-family: var(--font-sans) !important;
   }
 
-  .resume-sheet,
-  .resume-sheet *,
-  .resume-sheet *::before,
-  .resume-sheet *::after {
-    color: #000000 !important;
-    -webkit-text-fill-color: #000000 !important;
-    border-color: #71717a !important;
-    background-color: transparent !important;
-    font-family: "Inter", ui-sans-serif, system-ui, sans-serif !important;
-    font-weight: 500 !important;
-  }
-
-  .resume-sheet {
-    background: #ffffff !important;
-  }
-
+  /* Name: keep the on-screen Instrument Serif display face. */
   .resume-sheet h1,
-  .resume-sheet h2,
-  .resume-sheet h3,
-  .resume-sheet .resume-strong {
-    color: #000000 !important;
-    -webkit-text-fill-color: #000000 !important;
-    font-weight: 700 !important;
+  .resume-sheet .font-display {
+    font-family: var(--font-display) !important;
+    font-weight: 400 !important;
+    color: #18181b !important;
+    -webkit-text-fill-color: #18181b !important;
   }
 
-  .resume-sheet h1 {
-    font-size: 28pt !important;
-    letter-spacing: -0.02em !important;
-    line-height: 1.1 !important;
+  /* Section labels stay mono + tracking like the page. */
+  .resume-sheet h2,
+  .resume-sheet .font-mono {
+    font-family: var(--font-mono) !important;
   }
 
   .resume-sheet h2 {
-    font-size: 9pt !important;
-    font-weight: 700 !important;
-    letter-spacing: 0.14em !important;
-    text-transform: uppercase !important;
-  }
-
-  .resume-sheet .resume-muted,
-  .resume-sheet .resume-faint,
-  .resume-sheet p,
-  .resume-sheet li,
-  .resume-sheet span {
-    color: #000000 !important;
-    -webkit-text-fill-color: #000000 !important;
+    color: #52525b !important;
+    -webkit-text-fill-color: #52525b !important;
     font-weight: 500 !important;
+    font-size: 11px !important;
+    letter-spacing: 0.18em !important;
+    text-transform: uppercase !important;
+    border-color: #d4d4d8 !important;
   }
 
-  .resume-sheet .resume-faint {
+  .resume-sheet h3,
+  .resume-sheet .resume-strong {
+    color: #18181b !important;
+    -webkit-text-fill-color: #18181b !important;
     font-weight: 600 !important;
   }
 
-  /* Keep the two-column feel on paper without a forced blank first page. */
+  .resume-sheet .resume-muted {
+    color: #3f3f46 !important;
+    -webkit-text-fill-color: #3f3f46 !important;
+  }
+
+  .resume-sheet .resume-faint {
+    color: #52525b !important;
+    -webkit-text-fill-color: #52525b !important;
+  }
+
+  /* Tighten vertical rhythm so header + grid share page 1. */
+  .resume-sheet > header {
+    padding-bottom: 0.28in !important;
+    margin-bottom: 0.28in !important;
+    break-after: avoid !important;
+    page-break-after: avoid !important;
+  }
+
+  .resume-sheet > header p {
+    margin-top: 0.18in !important;
+  }
+
   .resume-sheet .resume-grid {
     display: grid !important;
     grid-template-columns: 1fr 2fr !important;
-    gap: 0.35in !important;
-  }
-
-  .resume-sheet .resume-main {
+    gap: 0.28in 0.35in !important;
     break-before: auto !important;
     page-break-before: auto !important;
   }
 
-  .resume-sheet .print\:break-inside-avoid,
+  .resume-sheet .resume-main,
+  .resume-sheet aside {
+    break-before: auto !important;
+    page-break-before: auto !important;
+  }
+
+  /* CRITICAL: do NOT avoid-break whole sections (Experience is taller than
+     the leftover page-1 space → browser shoves the entire grid to page 2,
+     leaving a giant empty gap under the intro). Only keep small cards intact. */
+  .resume-sheet section {
+    break-inside: auto !important;
+    page-break-inside: auto !important;
+  }
+
   .resume-sheet .resume-avoid-break {
     break-inside: avoid !important;
     page-break-inside: avoid !important;
   }
 
-  /* Skill chips: dark outline, black label. */
+  /* Skill chips: outline zinc, same as screen. */
   .resume-sheet [data-slot='badge'],
   .resume-sheet .resume-chip {
-    background: #ffffff !important;
-    color: #000000 !important;
-    -webkit-text-fill-color: #000000 !important;
-    border: 1.5px solid #000000 !important;
-    font-weight: 600 !important;
+    background: transparent !important;
+    color: #27272a !important;
+    -webkit-text-fill-color: #27272a !important;
+    border: 1px solid #a1a1aa !important;
+    font-weight: 400 !important;
   }
 
-  /* Bullet dots must stay solid black. */
-  .resume-sheet .size-1,
-  .resume-sheet .size-1\.5,
+  /* Bullet dots. */
   .resume-sheet span.rounded-full {
-    background: #000000 !important;
-    background-color: #000000 !important;
-    color: #000000 !important;
+    background: #3f3f46 !important;
+    background-color: #3f3f46 !important;
   }
 
-  /* Icons stroke black. */
+  /* Icons match muted zinc. */
   .resume-sheet svg {
-    color: #000000 !important;
-    stroke: #000000 !important;
-    fill: none !important;
+    color: #52525b !important;
+    stroke: #52525b !important;
   }
 }
