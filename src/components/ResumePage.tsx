@@ -120,7 +120,7 @@ export default function ResumePage() {
         <header className="border-b border-zinc-200 pb-6 mb-8">
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
             <div>
-              <h1 className="resume-strong font-display text-4xl sm:text-5xl tracking-tight text-zinc-900">
+              <h1 className="resume-strong font-sans text-4xl sm:text-5xl font-bold tracking-tight text-zinc-900">
                 Michael Fillalan
               </h1>
               <p className="resume-muted text-lg text-zinc-600 mt-1">Software Engineer</p>
