@@ -44,7 +44,10 @@ interface Boid {
   orbit: HTMLElement | null
 }
 
-const COUNT = 80
+// Sparse flock — dense enough to read as a school, light enough not to
+// dominate the page. Was 135 → 80; cut again after the ambient field felt
+// busy against the content.
+const COUNT = 28
 const PERCEIVE = 55
 const SEPARATE = 22
 const FLEE_RADIUS = 130
@@ -123,7 +126,8 @@ const ORBIT_RADIAL_K = 0.025
 const ORBIT_TANGENT_K = 0.09
 // Cap on how many boids a single orbit element can hold. Anything beyond
 // this just swims past instead of getting recruited into the ring.
-const ORBIT_CAPACITY = 15
+// Scaled down with COUNT so one orbit can't claim half the flock.
+const ORBIT_CAPACITY = 6
 
 // Behavior weights (tuning knobs).
 const W_SEPARATION = 1.4
