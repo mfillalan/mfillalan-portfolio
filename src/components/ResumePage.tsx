@@ -26,6 +26,12 @@ const skills = [
 
 const selectedProjects = [
   {
+    name: 'Tendrite',
+    tagline:
+      'Local-first coding command center. Native desktop workspace that unifies projects, multi-agent missions, memory substrate, git-native review, and model routing — with a phone companion for steering work away from the desk. Open core; free local workspace at tendrite.dev.',
+    stack: 'Desktop · Local-First · Multi-Agent · Memory · Git · Model Routing',
+  },
+  {
     name: 'Dendrite Wiki',
     tagline:
       'Local-first MCP server on npm that gives AI coding agents a living markdown knowledge base, project memory, and lightweight habits. One command (npx -y dendrite-wiki) installs it into nine agent clients, including Claude Code, Codex, Cursor, and Copilot. Its capsule profile cuts MCP startup from ~5,300 to ~540 tokens.',

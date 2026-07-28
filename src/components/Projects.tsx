@@ -27,37 +27,71 @@ const BASE = import.meta.env.BASE_URL
 
 const projects: Project[] = [
   {
-    title: 'Dendrite Studio',
+    title: 'Tendrite',
     featured: true,
     summary:
-      'A native desktop app (Rust + egui, Obsidian-style) for running AI coding agents on your own machine. You give it a goal; a built-in Conductor turns that into a plan, splits it into smaller missions, and runs the ready ones in parallel. Each agent works in its own git worktree, and they all share a memory and skills store that sticks around between sessions.',
+      'A local-first coding command center. Tendrite turns projects, agents, memory, source control, and decisions into one native desktop workspace so you can ship work that matters — not babysit chat tabs.',
     role:
-      "Creator and sole engineer. I build the whole Rust stack: the egui desktop UI (file tree, editor, agent chat, and substrate sidebar), the Conductor that plans and schedules missions, the parallel git-worktree runner that merges work back one change at a time, the in-process loop that drives the Grok agent over OAuth, the dendrite-core crate behind it all (memory, skills, missions, campaigns), and the localhost MCP server that hands the substrate back to the agents.",
+      'Creator and sole engineer. I design and build the full product: the native desktop workspace, the memory substrate, mission and campaign orchestration, git-native review, multi-provider model routing, the phone companion (Tendrite Codec), and the open-core product surface at tendrite.dev.',
     details:
-      "Dendrite Studio is a command center for AI coding work. Open a project folder and you get a native window with a file tree, a markdown editor, an agent chat panel, and sidebar tabs for the project's memory, skills, and mission board. You hand it a goal, watch the agents work in the chat, check the result, and go again. Each project keeps its own `.dendrite/` store on disk, so its memory travels with the code.\n\nUnder the hood it's a Cargo workspace with two crates. `dendrite-core` is the engine: memory, skills, missions, campaigns, git, and the agent loop. `dendrite-studio` is the egui desktop app around it. Agents sign in with your existing Grok auth (Studio's OAuth or the `grok` CLI's saved session), so you never paste API keys into the app. The store runs in-process for speed and also exposes a localhost MCP server, so agents reach memory and skills through a standard interface.\n\nThe Conductor is the heart of it. Hand it a goal and it writes a plan, breaks the work into missions, and links them by what depends on what. It then runs them in the right order, with a verification step before anything counts as done. Turn parallel mode on and every mission that's ready runs at once, each in its own git worktree on a `dendrite/<slug>` branch, so two agents never edit the same files at the same time. Finished work merges back into the main branch one mission at a time. If a merge hits a conflict, the app stops, marks that mission blocked, and shows you the files instead of guessing or losing work. Once everything passes, the Conductor writes a report.\n\nThe store is the part I care about most. Memory holds lessons, facts, warnings, and handoff notes that survive between sessions, and every recall can explain why it surfaced. The mission board is a kanban the agents drive themselves, with todos, claim leases so two agents don't grab the same work, and missions you can pause and resume. Skills are reusable, versioned recipes agents can find and run. It's all local and private. The test I hold it to: delete Studio tomorrow and your `.dendrite/` memory and skills are still plain, useful files on disk.\n\nDendrite Studio is pre-alpha, built from the ground up in Rust. It started as an Electron and React prototype, which I cut once the native direction was clear; that version is saved at the `electron-final` git tag. CI builds and tests it on Windows on every push.",
+      "Tendrite is a local-first command center for agentic coding. Open a project and you get one operating surface for the file tree, editor, agent console, source control, memory, skills, and mission board — so the work stays inspectable from the first plan to the final review instead of scattered across a terminal, browser, and chat tabs.\n\nIt is not a chat wrapper. You set a bounded objective, assign focused agent roles, and watch a live campaign board show where the team is, what is blocked, and which decision needs you next. Agents capture facts, lessons, warnings, and handoffs as they go; each new task gets a focused brief drawn from keyword, semantic, and relationship signals rather than a dump of the whole archive. You stay in control: pin what matters, consolidate or retire stale knowledge, and keep archived memories recoverable.\n\nModel independence is built in. Connect the subscriptions, API keys, or local models you already trust — the workspace does not force one provider. Git-native review keeps impact and diffs beside the agent work. When you step away, the Tendrite Codec phone companion lets you follow live runs, answer agent questions, switch projects, and steer the next move over your own network path or an optional managed Cloud relay.\n\nThe product is open core and ships as a desktop beta for Windows and Linux (macOS when a signed Apple build is ready). Free covers the full local workspace; Pro unlocks connected multi-project and phone capabilities. Your code and project brain stay on your machine. Same test as the rest of my work: the useful state should outlive the app.\n\nTendrite grew out of the Dendrite line of experiments (memory daemon, wiki MCP, early studio prototype). The through-line was always the same: agents that remember, work you can steer, and less friction between intent and shipped change.",
     impact:
-      "Takes the Dendrite memory-and-skills idea and turns it into a desktop app where you set a goal and the Conductor runs a whole graph of coding missions in parallel, each safely sandboxed in its own git worktree. It's early, but it's the project that best shows where my energy is right now: native speed, agents that remember, and parallel work that stays safe with a human steering.",
-    tags: ['Rust', 'egui / eframe', 'Desktop App', 'Multi-Agent', 'Orchestration', 'Git Worktrees', 'MCP', 'Grok / xAI', 'Local-First'],
-    repoUrl: 'https://github.com/mfillalan/dendrite-studio',
-    accent: 'from-amber-500/30 via-orange-500/15 to-transparent',
-    shelterColor: '245, 180, 90',
+      'Turns agentic coding from tab-juggling into an operable workflow: missions with a real board, memory that survives the next session, git review in the same surface, and a phone companion when you step away. It is the project that best shows where my energy is right now — local-first systems, multi-agent orchestration, and software that feels good to direct.',
+    tags: [
+      'Desktop App',
+      'Local-First',
+      'Multi-Agent',
+      'Memory Substrate',
+      'Orchestration',
+      'Git-Native Review',
+      'Model Routing',
+      'Phone Companion',
+      'Open Core',
+    ],
+    repoUrl: 'https://github.com/mfillalan/tendrite',
+    liveUrl: 'https://tendrite.dev',
+    accent: 'from-violet-500/30 via-fuchsia-500/15 to-transparent',
+    shelterColor: '180, 140, 255',
     screenshots: [
       {
-        src: `${BASE}projects/dendrite-studio/01-workspace.png`,
+        src: `${BASE}projects/tendrite/01-workspace.webp`,
         caption:
-          'Workspace: file tree, markdown editor, agent chat, and memory / skills / mission-board tabs in one native window.',
+          'Workspace: projects, agents, editor, and context in one native operating surface.',
       },
       {
-        src: `${BASE}projects/dendrite-studio/02-agent-chat.png`,
-        caption: 'Agent chat: an in-process Grok agent streaming its tool calls as it works a mission.',
+        src: `${BASE}projects/tendrite/02-memory.webp`,
+        caption:
+          'Memory substrate: a living map of what the project knows, how it connects, and what needs attention.',
       },
       {
-        src: `${BASE}projects/dendrite-studio/03-mission-board.png`,
-        caption: 'Mission board: an agent-driven kanban of missions with dependencies, claim leases, and resumable, parallel runs.',
+        src: `${BASE}projects/tendrite/03-command-center.webp`,
+        caption:
+          'Live agent command center: see the work, inspect its context, and steer the run without leaving the project.',
       },
       {
-        src: `${BASE}projects/dendrite-studio/04-memory-skills.png`,
-        caption: 'Memory & skills: durable, explainable recall and versioned workflow recipes stored under .dendrite/.',
+        src: `${BASE}projects/tendrite/04-mission-work.webp`,
+        caption:
+          'Mission execution: follow work in progress and intervene with the right context.',
+      },
+      {
+        src: `${BASE}projects/tendrite/05-campaign-map.webp`,
+        caption:
+          'Campaign map: give long-running work a shape you can scan — objectives, squad, and blockers.',
+      },
+      {
+        src: `${BASE}projects/tendrite/06-source-control.webp`,
+        caption:
+          'Git-native review: impact and changes beside the agent work, not in a separate tool.',
+      },
+      {
+        src: `${BASE}projects/tendrite/07-accounts.webp`,
+        caption:
+          'Bring your models: route work through the subscriptions and providers you already use.',
+      },
+      {
+        src: `${BASE}projects/tendrite/08-phone-relay.webp`,
+        caption:
+          'Phone companion: follow live work, answer questions, and steer from Tendrite Codec.',
       },
     ],
   },
@@ -102,8 +136,8 @@ const projects: Project[] = [
     impact:
       "Gives AI-assisted coding real continuity: context that carries over, decisions you can trace back, and a growing store of reusable project knowledge.",
     tags: ['Rust', 'Tokio', 'Axum', 'SQLite', 'Vector Search', 'React', 'TypeScript', 'MCP', 'Ollama', 'Knowledge Graph'],
-    accent: 'from-violet-500/30 via-fuchsia-500/15 to-transparent',
-    shelterColor: '200, 130, 240',
+    accent: 'from-amber-500/30 via-orange-500/15 to-transparent',
+    shelterColor: '245, 180, 90',
     screenshots: [
       {
         src: `${BASE}projects/dendritemcp/01-bridge.png`,
