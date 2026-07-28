@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion'
 import { ArrowLeft, Download, Globe, Mail, MapPin, Printer } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -96,7 +95,7 @@ const experience = [
 
 export default function ResumePage() {
   return (
-    <div className="min-h-screen bg-muted/40 pt-28 pb-16 px-4 print:min-h-0 print:pt-0 print:pb-0 print:px-0">
+    <div className="min-h-screen bg-muted/40 pt-28 pb-16 px-4 print:min-h-0 print:bg-white print:pt-0 print:pb-0 print:px-0">
       <div className="no-print mx-auto mb-6 max-w-[8.5in] flex items-center justify-between">
         <Button asChild variant="ghost" size="sm">
           <a href="#/">
@@ -115,21 +114,18 @@ export default function ResumePage() {
         </div>
       </div>
 
-      <motion.article
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="mx-auto max-w-[8.5in] bg-white text-zinc-900 rounded-lg shadow-2xl p-12 print:shadow-none print:rounded-none print:p-0 print:max-w-none print:overflow-hidden"
-      >
+      {/* Plain article (no Framer Motion): motion leaves opacity/transform
+          inline styles that many print engines render as washed-out type. */}
+      <article className="resume-sheet mx-auto max-w-[8.5in] bg-white text-zinc-900 rounded-lg shadow-2xl p-8 sm:p-12 print:shadow-none print:rounded-none print:p-0 print:max-w-none">
         <header className="border-b border-zinc-200 pb-6 mb-8">
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
             <div>
-              <h1 className="font-display text-5xl tracking-tight text-zinc-900">
+              <h1 className="resume-strong font-display text-4xl sm:text-5xl tracking-tight text-zinc-900">
                 Michael Fillalan
               </h1>
-              <p className="text-lg text-zinc-600 mt-1">Software Engineer</p>
+              <p className="resume-muted text-lg text-zinc-600 mt-1">Software Engineer</p>
             </div>
-            <div className="space-y-1 text-sm text-zinc-700">
+            <div className="resume-muted space-y-1 text-sm text-zinc-700">
               <ContactRow icon={MapPin}>Virginia Beach, Virginia</ContactRow>
               <ContactRow icon={Mail}>
                 <a href="mailto:mfillalan@gmail.com" className="hover:underline">
@@ -168,7 +164,7 @@ export default function ResumePage() {
               </ContactRow>
             </div>
           </div>
-          <p className="mt-6 text-zinc-700 leading-relaxed max-w-3xl">
+          <p className="resume-muted mt-6 text-zinc-700 leading-relaxed max-w-3xl">
             Full-stack engineer with 14 years of production experience. I care about software
             that works well and feels good to use, and I'm hands-on across the whole stack, from
             architecture down to the small UI details. Right now I'm deep in AI-native
@@ -178,7 +174,7 @@ export default function ResumePage() {
               href="https://mfillalan.github.io/mfillalan-portfolio/"
               target="_blank"
               rel="noreferrer"
-              className="text-zinc-900 underline underline-offset-2 hover:text-zinc-700"
+              className="resume-strong text-zinc-900 underline underline-offset-2 hover:text-zinc-700"
             >
               mfillalan.github.io/mfillalan-portfolio
             </a>
@@ -186,13 +182,13 @@ export default function ResumePage() {
           </p>
         </header>
 
-        <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-10 print:block">
+        <div className="resume-grid grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-10">
           <aside className="space-y-8">
             <Section title="Highlights">
-              <ul className="space-y-2 text-sm text-zinc-700">
+              <ul className="resume-muted space-y-2 text-sm text-zinc-700">
                 {highlights.map((h) => (
                   <li key={h} className="flex gap-2">
-                    <span className="text-zinc-400 mt-1.5 size-1 rounded-full bg-current shrink-0" />
+                    <span className="mt-1.5 size-1.5 rounded-full bg-zinc-700 shrink-0" />
                     <span>{h}</span>
                   </li>
                 ))}
@@ -202,7 +198,11 @@ export default function ResumePage() {
             <Section title="Core Skills">
               <div className="flex flex-wrap gap-1.5">
                 {skills.map((s) => (
-                  <Badge key={s} variant="outline" className="font-normal text-zinc-700 border-zinc-300">
+                  <Badge
+                    key={s}
+                    variant="outline"
+                    className="resume-chip font-normal text-zinc-800 border-zinc-400 bg-transparent"
+                  >
                     {s}
                   </Badge>
                 ))}
@@ -211,33 +211,33 @@ export default function ResumePage() {
 
             <Section title="Education">
               <div className="space-y-3 text-sm">
-                <div>
-                  <p className="font-medium text-zinc-900">M.S. Information Systems</p>
-                  <p className="text-zinc-600">ECPI University · 2011 – 2012</p>
+                <div className="resume-avoid-break">
+                  <p className="resume-strong font-medium text-zinc-900">M.S. Information Systems</p>
+                  <p className="resume-muted text-zinc-600">ECPI University · 2011 – 2012</p>
                 </div>
-                <div>
-                  <p className="font-medium text-zinc-900">B.S. Computer Information Science</p>
-                  <p className="text-zinc-600">Simulation & Game Programming</p>
-                  <p className="text-zinc-600">ECPI University · 2006 – 2009</p>
+                <div className="resume-avoid-break">
+                  <p className="resume-strong font-medium text-zinc-900">B.S. Computer Information Science</p>
+                  <p className="resume-muted text-zinc-600">Simulation & Game Programming</p>
+                  <p className="resume-muted text-zinc-600">ECPI University · 2006 – 2009</p>
                 </div>
               </div>
             </Section>
           </aside>
 
-          <div className="print:break-before-page space-y-8">
+          <div className="resume-main space-y-8">
             <Section title="Professional Experience">
               <div className="space-y-6">
                 {experience.map((job) => (
-                  <div key={`${job.company}-${job.role}`} className="print:break-inside-avoid">
+                  <div key={`${job.company}-${job.role}`} className="resume-avoid-break">
                     <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1">
-                      <h3 className="font-medium text-zinc-900">{job.role}</h3>
-                      <span className="text-xs font-mono text-zinc-500">{job.period}</span>
+                      <h3 className="resume-strong font-medium text-zinc-900">{job.role}</h3>
+                      <span className="resume-faint text-xs font-mono text-zinc-600">{job.period}</span>
                     </div>
-                    <p className="text-sm text-zinc-600 mb-2">{job.company}</p>
-                    <ul className="space-y-1.5 text-sm text-zinc-700">
+                    <p className="resume-muted text-sm text-zinc-600 mb-2">{job.company}</p>
+                    <ul className="resume-muted space-y-1.5 text-sm text-zinc-700">
                       {job.details.map((d) => (
                         <li key={d} className="flex gap-2">
-                          <span className="text-zinc-400 mt-1.5 size-1 rounded-full bg-current shrink-0" />
+                          <span className="mt-1.5 size-1.5 rounded-full bg-zinc-700 shrink-0" />
                           <span className="leading-relaxed">{d}</span>
                         </li>
                       ))}
@@ -250,17 +250,17 @@ export default function ResumePage() {
             <Section title="Selected Projects">
               <div className="space-y-4">
                 {selectedProjects.map((p) => (
-                  <div key={p.name} className="print:break-inside-avoid">
-                    <h3 className="font-medium text-zinc-900">{p.name}</h3>
-                    <p className="text-sm text-zinc-700 leading-relaxed mt-1">{p.tagline}</p>
-                    <p className="text-xs font-mono text-zinc-500 mt-1.5">{p.stack}</p>
+                  <div key={p.name} className="resume-avoid-break">
+                    <h3 className="resume-strong font-medium text-zinc-900">{p.name}</h3>
+                    <p className="resume-muted text-sm text-zinc-700 leading-relaxed mt-1">{p.tagline}</p>
+                    <p className="resume-faint text-xs font-mono text-zinc-600 mt-1.5">{p.stack}</p>
                   </div>
                 ))}
               </div>
             </Section>
           </div>
         </div>
-      </motion.article>
+      </article>
     </div>
   )
 }
@@ -274,7 +274,7 @@ function ContactRow({
 }) {
   return (
     <div className="flex items-center gap-2 justify-end sm:justify-start">
-      <Icon className="size-3.5 text-zinc-500" />
+      <Icon className="size-3.5 text-zinc-600 shrink-0" />
       {children}
     </div>
   )
@@ -282,8 +282,8 @@ function ContactRow({
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section>
-      <h2 className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500 mb-3 pb-2 border-b border-zinc-200">
+    <section className="resume-avoid-break">
+      <h2 className="resume-faint font-mono text-[11px] uppercase tracking-[0.18em] text-zinc-600 mb-3 pb-2 border-b border-zinc-300">
         {title}
       </h2>
       {children}
